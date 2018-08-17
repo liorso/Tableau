@@ -1,92 +1,9 @@
-import enum
 import math
 import copy
-
+from common import NodeType, TruthValue
+from node import Node
+from formula import Formula
 # TODO ranks and initial in node creations
-
-class NodeType(enum.Enum):
-    PRE_STATE = 'pre_state'
-    STATE = 'state'
-    PROTO = 'proto'
-
-
-class Formula:
-    def __init__(self, formula_string):
-        self.formula_string = formula_string
-        self.marked = False
-
-    def mark(self):
-        assert not self.marked, 'formula is already marked'
-        self.marked = True
-
-    def split_alpha(self):
-        pass
-
-    def is_alpha(self):
-        pass
-
-    def split_beta(self):
-        pass
-
-    def is_beta(self):
-        pass
-
-    def is_true(self):
-        return self.formula_string == 'T'
-
-    def is_elementary:
-        pass
-
-
-class Node:
-    id = 0
-
-    def __init__(self, tableau, parents, children, node_type, initial, formulas, rank, min_child_rank):
-        Node.id += 1
-        self.id = Node.id
-        self.tableau = tableau
-        self.parents = parents if type(parents) == list else [parents]
-        self.children = children if type(children) == list else[children]
-        self.node_type = node_type
-        self.initial = initial
-        self.formulas = copy.deepcopy(formulas)
-        self.rank = rank
-        self.min_child_rank = min_child_rank
-        self.cloned = False
-
-        tableau.insert(self)
-
-    def _repr__(self):
-        return f'id: {self.id}, parents: {self.parents}, children: {self.children}, node_type: {self.node_type}' \
-               f'initial: {self.initial}, formulas: {self.formulas}, rank: {self.rank}, ' \
-               f'min_child_rank: {self.min_child_rank}'
-
-    def __eq__(self, other):
-        return self.id == other.id
-
-    def handle_alpha(self, formula):
-        a1, a2 = formula.split_alpha()
-
-        node1 = Node(tableau=self.tableau, parents=self, children=[], node_type=NodeType.PRE_STATE,
-                     initial=node.initial, formulas=self.formulas + [a1] + [a2],
-                     rank=math.inf, min_child_rank=math.inf)
-
-        self.children.append(node1)
-
-    def handle_beta(self):
-        b1, b2 = formula.split_beta()
-
-        node1 = Node(tableau=self.tableau, parents=self, children=[], node_type=NodeType.PRE_STATE,
-                     initial=node.initial, formulas=self.formulas + [b1],
-                     rank=math.inf, min_child_rank=math.inf)
-
-        node2 = Node(tableau=self.tableau, parents=self, children=[], node_type=NodeType.PRE_STATE,
-                     initial=node.initial, formulas=self.formulas + [b2],
-                     rank=math.inf, min_child_rank=math.inf)
-
-        self.children.append(node1)
-        self.children.append(node2)
-
 
 class Tableau:
 
@@ -100,6 +17,10 @@ class Tableau:
         self.state_to_pre = []
         self.pre_to_state = []
 
+    def __repr__(self):
+        return f'self.root_nodes: {self.root_nodes}, self.pre_states: {self.pre_states},' \
+               f'self.proto_states: {self.proto_states},  self.states: {self.states}' \
+
     def insert(self, node):
         if node.node_type == NodeType.PRE_STATE:
             self.pre_states[node.id] = node
@@ -112,40 +33,68 @@ class Tableau:
             self.root_nodes[node.id] = node
 
     def clone(self):
-        for node in self.pre_states:
-            if not node.cloned and node.children == []:
+        for node in self.pre_states.values():
+            if not node.cloned and len(node.children) == 0:
                 node.cloned = True
-                new_node = Node(tableau=self, parents=node, children=[], node_type=NodeType.PROTO, initial=node.initial,
+                new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO, initial=False,
                                 formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
                 node.children.append(new_node)
 
-
     def apply_alpha_beta(self):
-        for node in self.proto_states:
+        for node in self.proto_states.values():
             for formula in node.formulas:
                 if formula.is_true():
-                    new_node = Node(tableau=self, parents=node, children=[], node_type=NodeType.STATE,
-                                    initial=node.initial, formulas=[formula], rank=math.inf, min_child_rank=math.inf)
+                    new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
+                                    initial=False, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
                     node.children.append(new_node)
 
                 if not formula.marked and not formula.is_elementary():
                     formula.mark()
 
-                    if formula.is_alpha():
-                        node.handle_alpha()
-                    else:
-                        assert formula.is_beta(), 'formula must be alpha/beta/elementary'
-                        node.handle_beta()
+                    is_alpha, formulas = formula.is_alpha()
+                    if is_alpha:
+                        node.handle_alpha(formulas)
 
-            if len(node.children == 0):
+                    is_beta, formulas = formula.is_beta()
+                    assert is_beta, 'formula must be alpha/beta/elementary'
+                    node.handle_beta(formulas)
+
+            if len(node.children) == 0:
                 node.node_type = NodeType.STATE
 
-
     def remove_proto_states(self):
-        pass
+        for proto_state in self.proto_states.values():
+            assert proto_state.node_type == NodeType.PROTO
+            for parent in proto_state.parents:
+                assert parent.node_type == NodeType.PRE_STATE
+                parent.children.remove(proto_state)
+                parent.children.update(proto_state.children)
+
+            for child in proto_state.children:
+                assert child.node_type == NodeType.STATE
+                child.parents.remove(proto_state)
+                child.parents.update(proto_state.parents)
+
+        self.proto_states = {}
 
     def next_rule(self):
-        pass
+        for state in self.states.values():
+            if not state.cloned:
+                state.cloned = True
+                if state.is_consistent():
+                    next_formulas = state.get_next_formulas()
+                    if len(next_formulas) == 0:
+                        next_formulas = set(TruthValue.TRUE)
+
+                    for pre_state in self.pre_states.values():
+                        if next_formulas == pre_state.formulas:
+                            pre_state.parents.add(state)
+                            state.children.add(pre_state)
+                            break
+
+                    new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
+                                    initial=False, formulas=next_formulas, rank=math.inf, min_child_rank=math.inf)
+                    state.children.add(new_node)
 
     def __eq__(self, other):
         return self.root_nodes == other.root_nodes and self.pre_states == other.pre_states \
@@ -154,17 +103,19 @@ class Tableau:
 
 def construct_pretableau(formula):
     tableau = Tableau()
-    Node(tableau=tableau, parents=[], children=[], node_type=NodeType.PRE_STATE, initial=True,
+    Node(tableau=tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE, initial=True,
          formulas=[formula], rank=math.inf, min_child_rank=math.inf)
 
     while True:
+        print(tableau)
         current_tableau = copy.deepcopy(tableau)
         tableau.clone()
-
+        print(tableau)
         if current_tableau == tableau:
             break
 
         tableau.apply_alpha_beta()
+        print(tableau)
         tableau.remove_proto_states()
         tableau.next_rule()
 
@@ -172,10 +123,7 @@ def construct_pretableau(formula):
 
 
 def remove_prestates():
-    return None
-
-
-def remove_inconsistent():
+    # if id == 0 (root) mark child as initial
     return None
 
 
@@ -191,8 +139,7 @@ def remove_non_succesors():
     return None
 
 
-
-def main(formula):
+def build_tableau(formula):
     tableau = construct_pretableau(formula)
     tableau = remove_prestates()
     tableau = remove_inconsistent()
@@ -202,3 +149,9 @@ def main(formula):
         tableau = remove_non_succesors()
 
     return is_open(tableau)
+
+
+def main():
+    build_tableau(Formula('Xp'))
+
+main()
