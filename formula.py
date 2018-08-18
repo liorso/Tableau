@@ -9,6 +9,9 @@ class Formula:
     def __repr__(self):
         return f'string: {self.formula_string}, marked: {self.marked}'
 
+    def __hash__(self):
+        return hash(id(self))
+
     @staticmethod
     def _build_formula(formula):
         return f'{Connective.OPEN.value}{formula}{Connective.CLOSE.value}'

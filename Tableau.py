@@ -5,6 +5,7 @@ from node import Node
 from formula import Formula
 # TODO ranks and initial in node creations
 
+
 class Tableau:
 
     def __init__(self):
@@ -18,8 +19,8 @@ class Tableau:
         self.pre_to_state = []
 
     def __repr__(self):
-        return f'self.root_nodes: {self.root_nodes}, self.pre_states: {self.pre_states},' \
-               f'self.proto_states: {self.proto_states},  self.states: {self.states}' \
+        return f'root_nodes: {self.root_nodes}\npre_states: {self.pre_states}\n' \
+               f'proto_states: {self.proto_states}\nstates: {self.states}'
 
     def insert(self, node):
         if node.node_type == NodeType.PRE_STATE:
@@ -38,7 +39,7 @@ class Tableau:
                 node.cloned = True
                 new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO, initial=False,
                                 formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
-                node.children.append(new_node)
+                node.children.add(new_node)
 
     def apply_alpha_beta(self):
         for node in self.proto_states.values():
@@ -46,7 +47,7 @@ class Tableau:
                 if formula.is_true():
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
                                     initial=False, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
-                    node.children.append(new_node)
+                    node.children.add(new_node)
 
                 if not formula.marked and not formula.is_elementary():
                     formula.mark()
@@ -61,6 +62,9 @@ class Tableau:
 
             if len(node.children) == 0:
                 node.node_type = NodeType.STATE
+                self.states[node.id] = node
+
+        self.proto_states = {i: node for (i, node) in self.proto_states.items() if node.node_type == NodeType.PROTO}
 
     def remove_proto_states(self):
         for proto_state in self.proto_states.values():
@@ -75,7 +79,7 @@ class Tableau:
                 if state.is_consistent():
                     next_formulas = state.get_next_formulas()
                     if len(next_formulas) == 0:
-                        next_formulas = set(TruthValue.TRUE)
+                        next_formulas = {Formula(TruthValue.TRUE)}
 
                     for pre_state in self.pre_states.values():
                         if next_formulas == pre_state.formulas:
@@ -144,15 +148,12 @@ def construct_pretableau(formula):
          formulas=[formula], rank=math.inf, min_child_rank=math.inf)
 
     while True:
-        print(tableau)
         current_tableau = copy.deepcopy(tableau)
         tableau.clone()
-        print(tableau)
         if current_tableau == tableau:
             break
 
         tableau.apply_alpha_beta()
-        print(tableau)
         tableau.remove_proto_states()
         tableau.next_rule()
 
@@ -172,6 +173,7 @@ def build_tableau(formula):
 
 
 def main():
-    build_tableau(Formula('Xp'))
+    build_tableau(Formula('X(p)'))
+
 
 main()
