@@ -58,3 +58,25 @@ class Node:
 
     def get_next_formulas(self):
         return {formula[2:-1] for formula in self.formulas if formula.is_next()}
+
+    def remove(self):
+        for parent in self.parents:
+            parent.children.remove(self)
+            parent.children.update(self.children)
+
+        for child in self.children:
+            child.parents.remove(self)
+            child.parents.update(self.parents)
+
+    def find_all_successors(self):
+        pass
+
+    def simple_remove(self):
+        for parent in self.parents:
+            parent.children.remove(self)
+        for child in self.children:
+            child.parents.remove(self)
+        self.node_type = NodeType.REMOVED
+
+    def has_unfulfilled_eventuality(self):
+        pass

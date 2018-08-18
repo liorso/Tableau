@@ -65,16 +65,7 @@ class Tableau:
     def remove_proto_states(self):
         for proto_state in self.proto_states.values():
             assert proto_state.node_type == NodeType.PROTO
-            for parent in proto_state.parents:
-                assert parent.node_type == NodeType.PRE_STATE
-                parent.children.remove(proto_state)
-                parent.children.update(proto_state.children)
-
-            for child in proto_state.children:
-                assert child.node_type == NodeType.STATE
-                child.parents.remove(proto_state)
-                child.parents.update(proto_state.parents)
-
+            self.remove(proto_state)
         self.proto_states = {}
 
     def next_rule(self):
@@ -100,6 +91,52 @@ class Tableau:
         return self.root_nodes == other.root_nodes and self.pre_states == other.pre_states \
                and self.proto_states == other.proto_states and self.states == other.states
 
+    def remove_prestates(self):
+        # if id == 1 (root) mark child as initial
+        for pre_state in self.pre_states.values:
+            assert pre_state.node_type == NodeType.PRE_STATE
+            if pre_state.id == 1:
+                for init_state in pre_state.childrens.value:
+                    init_state.init = True
+            self.remove(pre_state)
+        self.pre_states = {}
+
+    def remove_state(self, node):
+        successors = node.find_all_successors()
+        candidates = successors
+        bad = successors
+        bad = bad.add(node)
+        for successor in successors:
+            for parent in successor.parants:
+                if parent not in bad:
+                    candidates.remove(successor)
+        candidates.add(node)
+        for node_to_remove in candidates:
+            node_to_remove.simple_remove()
+            self.states.remove(node_to_remove)
+
+    def remove_inconsistent(self):
+        self.remove_non_successors()
+
+
+    def remove_eventualities(self):
+        for state in self.states:
+            if state.has_unfulfilled_eventuality():
+                self.remove_state(state)
+
+
+    def remove_non_successors(self):
+        done = False
+        while not done:
+            current_tableau = copy.deepcopy(self)
+            for state in self.states:
+                if len(state.children) == 0:
+                    for parent in state.parents:
+                        parent.children.remove(state)
+                    state.node_type = NodeType.REMOVED
+                    self.states.remove(state)
+            if current_tableau == self:
+                done = True
 
 def construct_pretableau(formula):
     tableau = Tableau()
@@ -122,33 +159,16 @@ def construct_pretableau(formula):
     return tableau
 
 
-def remove_prestates():
-    # if id == 0 (root) mark child as initial
-    return None
-
-
-def remove_inconsistent():
-    return None
-
-
-def remove_eventualities():
-    return None
-
-
-def remove_non_succesors():
-    return None
-
-
 def build_tableau(formula):
     tableau = construct_pretableau(formula)
-    tableau = remove_prestates()
-    tableau = remove_inconsistent()
+    tableau.remove_prestates()
+    tableau.remove_inconsistent()
 
     while True:
-        tableau = remove_eventualities()
-        tableau = remove_non_succesors()
+        tableau.remove_eventualities()
+        tableau.remove_non_successors()
 
-    return is_open(tableau)
+    return tableau.is_open()
 
 
 def main():

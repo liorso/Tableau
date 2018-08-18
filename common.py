@@ -5,6 +5,7 @@ class NodeType(enum.Enum):
     PRE_STATE = 'pre_state'
     STATE = 'state'
     PROTO = 'proto'
+    REMOVED = 'removed'
 
 
 class Connective(enum.Enum):
