@@ -9,6 +9,7 @@ class Node:
 
     def __init__(self, tableau, parents, children, node_type, initial, formulas, rank, min_child_rank):
         Node.id += 1
+        print(formulas)
         self.id = Node.id
         self.tableau = tableau
         self.parents = parents if type(parents) == set else {parents}
@@ -19,7 +20,7 @@ class Node:
         self.rank = rank
         self.min_child_rank = min_child_rank
         self.cloned = False
-        self.loop = False
+        self.find_succesor_visited = False
 
         tableau.insert(self)
 
@@ -36,23 +37,28 @@ class Node:
         return hash(id(self))
 
     def handle_alpha(self, formulas):
-        node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=self.formulas.update(formulas),
-                     rank=math.inf, min_child_rank=math.inf)
+        new_formulas = set(self.formulas)
+        new_formulas.update(formulas)
 
-        self.children.append(node1)
+        node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+
+        self.children.add(node1)
 
     def handle_beta(self, formulas):
+        new_formulas = set(self.formulas)
+        new_formulas.update({formulas.pop()})
+
         node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=self.formulas.update(formulas[0]),
-                     rank=math.inf, min_child_rank=math.inf)
+                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
 
+        new_formulas = set(self.formulas)
+        new_formulas.update(formulas)
         node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=self.formulas.update(formulas[1]),
-                     rank=math.inf, min_child_rank=math.inf)
+                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
 
-        self.children.append(node1)
-        self.children.append(node2)
+        self.children.add(node1)
+        self.children.add(node2)
 
     def is_consistent(self):
         for formula in self.formulas:
@@ -74,11 +80,9 @@ class Node:
             child.parents.remove(self)
             child.parents.update(self.parents)
 
+    #TODO
     def find_all_successors(self):
-        successors = self.children
-        for successor in successors:
-            successors.update(successor.children)
-        return successors
+        return set()
 
     def simple_remove(self):
         for parent in self.parents:
@@ -88,10 +92,7 @@ class Node:
         self.node_type = NodeType.REMOVED
 
     def find_eventualities(self):
-        eventualities = set([])
-        for formula in self.formulas:
-            if formula.is_eventuality():
-                eventualities.add(formula)
+        eventualities = set([formula for formula in self.formulas if formula.is_eventuality()])
         return eventualities
 
     def fulfilled_finally(self, check_formula):
@@ -104,9 +105,9 @@ class Node:
         return False
 
     def fulfilled_until(self, first_formula, second_formula):
-        if self.loop:
+        if self.find_succesor_visited:
             return False
-        self.loop = True
+        self.find_succesor_visited = True
         first_formula_exists = False
         for formula in self.formulas:
             if second_formula == formula.formula_string:
@@ -136,17 +137,16 @@ class Node:
     def has_unfulfilled_eventuality(self):
         eventualities = self.find_eventualities()
         for eventuality in eventualities:
-            symbol, index = Formula._find_next_symbol(eventuality.formula_string)
+            symbol, index = eventuality.find_next_symbol(eventuality.formula_string)
             if symbol == Connective.FINALLY.value and not self.fulfilled_finally(eventuality.formula_string[2:-1]):
                 return True
             if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],\
                                                                              eventuality.formula_string[index + 2:-1]):
+                successors = self.find_all_successors()
+                successors.add(self)
+                for successor in successors:
+                    successor.find_succesor_visited = False
                 return True
-            # TODO: better way to prevent loops?
-            successors = self.find_all_successors()
-            successors.add(self)
-            for successor in successors:
-                successor.loop = False
             if not self.fulfilled_not_globally(eventuality.formula_string[4:-2]):
                 return True
         return False

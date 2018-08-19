@@ -19,7 +19,7 @@ class Tableau:
         self.pre_to_state = []
 
     def __repr__(self):
-        return f'root_nodes: {self.root_nodes}\npre_states: {self.pre_states}\n' \
+        return f'pre_states: {self.pre_states}\n' \
                f'proto_states: {self.proto_states}\nstates: {self.states}'
 
     def insert(self, node):
@@ -49,16 +49,19 @@ class Tableau:
                                     initial=False, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
                     node.children.add(new_node)
 
-                if not formula.marked and not formula.is_elementary():
+                elif not formula.marked and not formula.is_elementary():
                     formula.mark()
 
                     is_alpha, formulas = formula.is_alpha()
+                    formulas = {Formula(formulas[0]), Formula(formulas[1])}
                     if is_alpha:
                         node.handle_alpha(formulas)
 
-                    is_beta, formulas = formula.is_beta()
-                    assert is_beta, 'formula must be alpha/beta/elementary'
-                    node.handle_beta(formulas)
+                    else:
+                        is_beta, formulas = formula.is_beta()
+                        formulas = {Formula(formulas[0]), Formula(formulas[1])}
+                        assert is_beta, 'formula must be alpha/beta/elementary'
+                        node.handle_beta(formulas)
 
             if len(node.children) == 0:
                 node.node_type = NodeType.STATE
@@ -69,7 +72,7 @@ class Tableau:
     def remove_proto_states(self):
         for proto_state in self.proto_states.values():
             assert proto_state.node_type == NodeType.PROTO
-            self.remove(proto_state)
+            proto_state.remove()
         self.proto_states = {}
 
     def next_rule(self):
@@ -79,13 +82,13 @@ class Tableau:
                 if state.is_consistent():
                     next_formulas = state.get_next_formulas()
                     if len(next_formulas) == 0:
-                        next_formulas = {Formula(TruthValue.TRUE)}
+                        next_formulas = {Formula(TruthValue.TRUE.value)}
 
                     for pre_state in self.pre_states.values():
                         if next_formulas == pre_state.formulas:
                             pre_state.parents.add(state)
                             state.children.add(pre_state)
-                            break
+                            return
 
                     new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
                                     initial=False, formulas=next_formulas, rank=math.inf, min_child_rank=math.inf)
@@ -102,7 +105,7 @@ class Tableau:
             if pre_state.id == 1:
                 for init_state in pre_state.childrens.value:
                     init_state.init = True
-            self.remove(pre_state)
+                pre_state.remove()
         self.pre_states = {}
 
     def remove_state(self, node):
@@ -128,17 +131,14 @@ class Tableau:
                 self.remove_state(state)
 
     def remove_non_successors(self):
-        done = False
-        while not done:
-            current_tableau = copy.deepcopy(self)
+        removed = 0
+        while removed == 0:
             for state in self.states:
-                if len(state.children) == 0:
+                if len(state.children) == 0 and state.node_type != NodeType.REMOVED:
                     for parent in state.parents:
                         parent.children.remove(state)
                     state.node_type = NodeType.REMOVED
-                    self.states.remove(state)
-            if current_tableau == self:
-                done = True
+        self.states = {node_id: node for node_id, node in self.states.items() if node.node_type == NodeType.REMOVED}
 
 
 def construct_pretableau(formula):
@@ -146,33 +146,49 @@ def construct_pretableau(formula):
     Node(tableau=tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE, initial=True,
          formulas=[formula], rank=math.inf, min_child_rank=math.inf)
 
+    print('start loop:')
+    print(tableau)
+    i = 0
     while True:
+        #input(f'start loop {i}')
         current_tableau = copy.deepcopy(tableau)
         tableau.clone()
+        print('\nafter clone:')
+        print(tableau)
         if current_tableau == tableau:
             break
 
         tableau.apply_alpha_beta()
+        print('\nafter alpha beta')
+        print(tableau)
         tableau.remove_proto_states()
+        print('\nafter remove proto')
+        print(tableau)
+        if i == 2:
+            import pdb
+            #pdb.set_trace()
         tableau.next_rule()
+        print('\nafter next')
+        print(tableau)
+        i += 1
 
     return tableau
 
 
 def build_tableau(formula):
     tableau = construct_pretableau(formula)
-    tableau.remove_prestates()
-    tableau.remove_inconsistent()
-
-    while True:
-        tableau.remove_eventualities()
-        tableau.remove_non_successors()
-
-    return tableau.is_open()
+    # tableau.remove_prestates()
+    # tableau.remove_inconsistent()
+    #
+    # while True:
+    #     tableau.remove_eventualities()
+    #     tableau.remove_non_successors()
+    #
+    # return tableau.is_open()
 
 
 def main():
-    build_tableau(Formula('X(p)'))
+    build_tableau(Formula('(a)>(b)'))
 
 
 main()

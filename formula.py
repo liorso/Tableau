@@ -10,14 +10,16 @@ class Formula:
         return f'string: {self.formula_string}, marked: {self.marked}'
 
     def __hash__(self):
-        return hash(id(self))
+        return hash(self.formula_string)
+
+    def __eq__(self, other):
+        return self.formula_string == other.formula_string
 
     @staticmethod
     def _build_formula(formula):
         return f'{Connective.OPEN.value}{formula}{Connective.CLOSE.value}'
 
-    @staticmethod
-    def _find_next_symbol(sub_formula_string):
+    def find_next_symbol(self, sub_formula_string):
         symbol = sub_formula_string[0]
         if symbol == Connective.OPEN.value:
             left_parenthesis = 1
@@ -31,19 +33,23 @@ class Formula:
                     right_parenthesis += 1
                 index += 1
 
+            print(sub_formula_string[index])
             assert sub_formula_string[index] in BINARY_CONNECTIVES
             return sub_formula_string[index], index
 
-        else:
-            assert symbol in UNARY_CONNECTIVES
+        elif symbol in UNARY_CONNECTIVES:
             return sub_formula_string[0], 0
+
+        else:
+            assert self.is_elementary(sub_formula_string)
+            return None, 0
 
     def mark(self):
         assert not self.marked, 'formula is already marked'
         self.marked = True
 
     def is_alpha(self):
-        symbol, index = self._find_next_symbol(self.formula_string)
+        symbol, index = self.find_next_symbol(self.formula_string)
 
         if symbol == Connective.AND.value:
             return True, (self.formula_string[1:index - 1], self.formula_string[index + 2:-1])
@@ -53,7 +59,7 @@ class Formula:
                                                      f'{self._build_formula(self.formula_string)}')
 
         if symbol == Connective.NOT.value:
-            second_symbol, second_index = self._find_next_symbol(self.formula_string[2:-1])
+            second_symbol, second_index = self.find_next_symbol(self.formula_string[2:-1])
             second_index += 2
 
             if second_symbol == Connective.NOT.value:
@@ -83,7 +89,7 @@ class Formula:
         return False, (None, None)
 
     def is_beta(self):
-        symbol, index = self._find_next_symbol(self.formula_string)
+        symbol, index = self.find_next_symbol(self.formula_string)
 
         if symbol == Connective.OR.value:
             return True, (self.formula_string[1:index - 1], self.formula_string[index + 2:-1])
@@ -103,7 +109,7 @@ class Formula:
                           f'{Connective.NEXT.value}{self._build_formula(self.formula_string)}')
 
         if symbol == Connective.NOT.value:
-            second_symbol, second_index = self._find_next_symbol(self.formula_string[2:-1])
+            second_symbol, second_index = self.find_next_symbol(self.formula_string[2:-1])
             second_index += 2
 
             if second_symbol == Connective.AND.value:
@@ -128,26 +134,29 @@ class Formula:
 
             return False, (None, None)
 
-    def is_true(self):
+    def is_true(self, sub_formula=None):
+        formula_string = sub_formula or self.formula_string
         return self.formula_string == TruthValue.TRUE.value
 
-    def is_next(self):
-        return self.formula_string[0] == Connective.NEXT.value
+    def is_next(self, sub_formula=None):
+        formula_string = sub_formula or self.formula_string
+        return formula_string[0] == Connective.NEXT.value
 
-    def is_elementary(self):
-        is_atomic = len(self.formula_string) == 1 and self.formula_string.islower()
-        is_atomic_negation = (len(self.formula_string) == 4 and self.formula_string[2].islower() and
-                              self.formula_string[0] == Connective.NOT.value)
-        is_next = self.is_next()
+    def is_elementary(self, sub_formula=None):
+        formula_string = sub_formula or self.formula_string
+        is_atomic = len(formula_string) == 1 and formula_string.islower()
+        is_atomic_negation = (len(formula_string) == 4 and formula_string[2].islower() and
+                              formula_string[0] == Connective.NOT.value)
+        is_next = self.is_next(formula_string)
 
         return is_atomic or is_atomic_negation or is_next
 
     def is_eventuality(self):
-        symbol, index = self._find_next_symbol(self.formula_string)
+        symbol, index = self.find_next_symbol(self.formula_string)
         if symbol == Connective.FINALLY.value or symbol == Connective.UNTIL.value:
             return True
         if symbol == Connective.NOT.value:
-            second_symbol, second_index = self._find_next_symbol(self.formula_string[2:-1])
+            second_symbol, second_index = self.find_next_symbol(self.formula_string[2:-1])
             if second_symbol == Connective.GLOBALLY.value:
                 return True
         return False
