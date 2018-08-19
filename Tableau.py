@@ -122,12 +122,10 @@ class Tableau:
     def remove_inconsistent(self):
         self.remove_non_successors()
 
-
     def remove_eventualities(self):
         for state in self.states:
             if state.has_unfulfilled_eventuality():
                 self.remove_state(state)
-
 
     def remove_non_successors(self):
         done = False
@@ -141,6 +139,7 @@ class Tableau:
                     self.states.remove(state)
             if current_tableau == self:
                 done = True
+
 
 def construct_pretableau(formula):
     tableau = Tableau()

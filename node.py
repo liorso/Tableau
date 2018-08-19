@@ -19,6 +19,7 @@ class Node:
         self.rank = rank
         self.min_child_rank = min_child_rank
         self.cloned = False
+        self.loop = False
 
         tableau.insert(self)
 
@@ -74,7 +75,10 @@ class Node:
             child.parents.update(self.parents)
 
     def find_all_successors(self):
-        pass
+        successors = self.children
+        for successor in successors:
+            successors.update(successor.children)
+        return successors
 
     def simple_remove(self):
         for parent in self.parents:
@@ -83,5 +87,66 @@ class Node:
             child.parents.remove(self)
         self.node_type = NodeType.REMOVED
 
+    def find_eventualities(self):
+        eventualities = set([])
+        for formula in self.formulas:
+            if formula.is_eventuality():
+                eventualities.add(formula)
+        return eventualities
+
+    def fulfilled_finally(self, check_formula):
+        successors = self.find_all_successors()
+        successors.add(self)
+        for successor in successors:
+            for formula in successor.formulas:
+                if check_formula == formula.formula_string:
+                    return True
+        return False
+
+    def fulfilled_until(self, first_formula, second_formula):
+        if self.loop:
+            return False
+        self.loop = True
+        first_formula_exists = False
+        for formula in self.formulas:
+            if second_formula == formula.formula_string:
+                return True
+            if first_formula == formula.formula_string:
+                first_formula_exists = True
+        if not first_formula_exists:
+            return False
+        for child in self.children:
+            if child.fulfilled_until(first_formula, second_formula):
+                return True
+        return False
+
+    def fulfilled_not_globally(self, check_formula):
+        successors = self.find_all_successors()
+        successors.add(self)
+        for successor in successors:
+            fulfilled = False
+            for formula in successor.formulas:
+                if check_formula == formula:
+                    fulfilled = True
+                    break
+            if not fulfilled:
+                return True
+        return False
+
     def has_unfulfilled_eventuality(self):
-        pass
+        eventualities = self.find_eventualities()
+        for eventuality in eventualities:
+            symbol, index = Formula._find_next_symbol(eventuality.formula_string)
+            if symbol == Connective.FINALLY.value and not self.fulfilled_finally(eventuality.formula_string[2:-1]):
+                return True
+            if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],\
+                                                                             eventuality.formula_string[index + 2:-1]):
+                return True
+            # TODO: better way to prevent loops?
+            successors = self.find_all_successors()
+            successors.add(self)
+            for successor in successors:
+                successor.loop = False
+            if not self.fulfilled_not_globally(eventuality.formula_string[4:-2]):
+                return True
+        return False

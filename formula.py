@@ -141,3 +141,13 @@ class Formula:
         is_next = self.is_next()
 
         return is_atomic or is_atomic_negation or is_next
+
+    def is_eventuality(self):
+        symbol, index = self._find_next_symbol(self.formula_string)
+        if symbol == Connective.FINALLY.value or symbol == Connective.UNTIL.value:
+            return True
+        if symbol == Connective.NOT.value:
+            second_symbol, second_index = self._find_next_symbol(self.formula_string[2:-1])
+            if second_symbol == Connective.GLOBALLY.value:
+                return True
+        return False
