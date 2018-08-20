@@ -34,12 +34,15 @@ class Tableau:
             self.root_nodes[node.id] = node
 
     def clone(self):
+        changed = False
         for node in self.pre_states.values():
             if not node.cloned and len(node.children) == 0:
                 node.cloned = True
                 new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO, initial=False,
                                 formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
                 node.children.add(new_node)
+                changed = True
+        return changed
 
     def apply_alpha_beta(self):
         for node in self.proto_states.values():
@@ -151,12 +154,11 @@ def construct_pretableau(formula):
     i = 0
     while True:
         #input(f'start loop {i}')
-        current_tableau = copy.deepcopy(tableau)
-        tableau.clone()
+        if not tableau.clone():
+            # clone() didn't change the tableau, no need to continue
+            break
         print('\nafter clone:')
         print(tableau)
-        if current_tableau == tableau:
-            break
 
         tableau.apply_alpha_beta()
         print('\nafter alpha beta')

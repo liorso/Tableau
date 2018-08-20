@@ -22,6 +22,7 @@ class Node:
         self.cloned = False
         self.find_succesor_visited = False
 
+
         tableau.insert(self)
 
     def __repr__(self):
@@ -80,9 +81,24 @@ class Node:
             child.parents.remove(self)
             child.parents.update(self.parents)
 
-    #TODO
+    def clear_find_succesor_visited_flag(self, successors):
+        self.find_succesor_visited = False
+        for successor in successors:
+            successor.find_succesor_visited = False
+
     def find_all_successors(self):
-        return set()
+        successors = self.find_all_successors_rec()
+        self.clear_find_succesor_visited_flag(successors)
+        return successors
+
+    def find_all_successors_rec(self):
+        if self.find_succesor_visited:
+            return set()
+        self.find_succesor_visited = True
+        successors = set(self.children)
+        for child in self.children:
+            successors.update(child.find_all_successors_rec())
+        return successors
 
     def simple_remove(self):
         for parent in self.parents:
@@ -105,6 +121,12 @@ class Node:
         return False
 
     def fulfilled_until(self, first_formula, second_formula):
+        successors = self.find_all_successors()
+        ans = self.fulfilled_until_rec(first_formula, second_formula)
+        self.clear_find_succesor_visited_flag(successors)
+        return ans
+
+    def fulfilled_until_rec(self, first_formula, second_formula):
         if self.find_succesor_visited:
             return False
         self.find_succesor_visited = True
@@ -117,7 +139,7 @@ class Node:
         if not first_formula_exists:
             return False
         for child in self.children:
-            if child.fulfilled_until(first_formula, second_formula):
+            if child.fulfilled_until_rec(first_formula, second_formula):
                 return True
         return False
 
@@ -142,10 +164,6 @@ class Node:
                 return True
             if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],\
                                                                              eventuality.formula_string[index + 2:-1]):
-                successors = self.find_all_successors()
-                successors.add(self)
-                for successor in successors:
-                    successor.find_succesor_visited = False
                 return True
             if not self.fulfilled_not_globally(eventuality.formula_string[4:-2]):
                 return True
