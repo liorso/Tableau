@@ -87,6 +87,7 @@ class Tableau:
                     if len(next_formulas) == 0:
                         next_formulas = {Formula(TruthValue.TRUE.value)}
 
+                    found_pre_state = False
                     for pre_state in self.pre_states.values():
                         if next_formulas == pre_state.formulas:
                             pre_state.parents.add(state)
