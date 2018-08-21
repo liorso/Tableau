@@ -106,12 +106,12 @@ class Tableau:
 
     def remove_prestates(self):
         # if id == 1 (root) mark child as initial
-        for pre_state in self.pre_states.values:
+        for pre_state in self.pre_states.values():
             assert pre_state.node_type == NodeType.PRE_STATE
             if pre_state.id == 1:
-                for init_state in pre_state.childrens.value:
+                for init_state in pre_state.children:
                     init_state.init = True
-                pre_state.remove()
+            pre_state.remove()
         self.pre_states = {}
 
     def remove_state(self, node):
@@ -132,19 +132,31 @@ class Tableau:
         self.remove_non_successors()
 
     def remove_eventualities(self):
-        for state in self.states:
+        removed = False
+        for state in self.states.values():
             if state.has_unfulfilled_eventuality():
                 self.remove_state(state)
+                removed = True
+        return removed
 
+    #TODO: Daniel, please check the logic still the same
+    #1. remove is now bool
+    #2. last line change to node.node_type != NodeType.REMOVED and not ==
     def remove_non_successors(self):
-        removed = 0
-        while removed == 0:
-            for state in self.states:
+        changed = False
+        removed = True
+        while removed:
+            removed = False
+            for state in self.states.values():
+                print(len(state.children), state)
                 if len(state.children) == 0 and state.node_type != NodeType.REMOVED:
                     for parent in state.parents:
                         parent.children.remove(state)
                     state.node_type = NodeType.REMOVED
-        self.states = {node_id: node for node_id, node in self.states.items() if node.node_type == NodeType.REMOVED}
+                    removed = True
+                    changed = True
+        self.states = {node_id: node for node_id, node in self.states.items() if node.node_type != NodeType.REMOVED}
+        return changed
 
 
 def construct_pretableau(formula):
@@ -152,29 +164,29 @@ def construct_pretableau(formula):
     Node(tableau=tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE, initial=True,
          formulas=[formula], rank=math.inf, min_child_rank=math.inf)
 
-    print('start loop:')
-    print(tableau)
+    #print('start loop:')
+    #print(tableau)
     i = 0
     while True:
         #input(f'start loop {i}')
         if not tableau.clone():
             # clone() didn't change the tableau, no need to continue
             break
-        print('\nafter clone:')
-        print(tableau)
+        #print('\nafter clone:')
+        #print(tableau)
 
         tableau.apply_alpha_beta()
-        print('\nafter alpha beta')
-        print(tableau)
+        #print('\nafter alpha beta')
+        #print(tableau)
         tableau.remove_proto_states()
-        print('\nafter remove proto')
-        print(tableau)
+        #print('\nafter remove proto')
+        #print(tableau)
         if i == 2:
             import pdb
             #pdb.set_trace()
         tableau.next_rule()
-        print('\nafter next')
-        print(tableau)
+        #print('\nafter next')
+        #print(tableau)
         i += 1
 
     return tableau
@@ -182,18 +194,25 @@ def construct_pretableau(formula):
 
 def build_tableau(formula):
     tableau = construct_pretableau(formula)
-    # tableau.remove_prestates()
-    # tableau.remove_inconsistent()
-    #
-    # while True:
-    #     tableau.remove_eventualities()
-    #     tableau.remove_non_successors()
-    #
+    print('after construct_pretableau:')
+    print(tableau)
+    tableau.remove_prestates() #TODO: bug with init flag
+    print('\n\nafter remove_prestates:')
+    print(tableau)
+    tableau.remove_inconsistent()
+    print('\n\nafter remove_inconsistent:')
+    print(tableau)
+
+    changed = True
+    while changed:
+        changed = tableau.remove_eventualities()
+        changed = tableau.remove_non_successors() or changed
+
     # return tableau.is_open()
 
 
 def main():
-    build_tableau(Formula('((a)A(c))O(b)'))
+    build_tableau(Formula('F(!(!(((a)A(c))O((b)A(!(b))))))'))
 
 
 main()
