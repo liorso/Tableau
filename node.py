@@ -9,7 +9,6 @@ class Node:
 
     def __init__(self, tableau, parents, children, node_type, initial, formulas, rank, min_child_rank):
         Node.id += 1
-        print(formulas)
         self.id = Node.id
         self.tableau = tableau
         self.parents = parents if type(parents) == set else {parents}

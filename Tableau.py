@@ -91,11 +91,13 @@ class Tableau:
                         if next_formulas == pre_state.formulas:
                             pre_state.parents.add(state)
                             state.children.add(pre_state)
-                            return
+                            found_pre_state = True
+                            continue
 
-                    new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
+                    if not found_pre_state:
+                        new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
                                     initial=False, formulas=next_formulas, rank=math.inf, min_child_rank=math.inf)
-                    state.children.add(new_node)
+                        state.children.add(new_node)
 
     def __eq__(self, other):
         return self.root_nodes == other.root_nodes and self.pre_states == other.pre_states \
@@ -190,7 +192,7 @@ def build_tableau(formula):
 
 
 def main():
-    build_tableau(Formula('(a)>(b)'))
+    build_tableau(Formula('((a)A(c))O(b)'))
 
 
 main()

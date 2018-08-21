@@ -33,7 +33,6 @@ class Formula:
                     right_parenthesis += 1
                 index += 1
 
-            print(sub_formula_string[index])
             assert sub_formula_string[index] in BINARY_CONNECTIVES
             return sub_formula_string[index], index
 
