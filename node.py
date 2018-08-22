@@ -41,7 +41,7 @@ class Node:
         new_formulas.update(formulas)
 
         node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
 
         self.children.add(node1)
 
@@ -50,12 +50,12 @@ class Node:
         new_formulas.update({formulas.pop()})
 
         node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
 
         new_formulas = set(self.formulas)
         new_formulas.update(formulas)
         node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=False, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
 
         self.children.add(node1)
         self.children.add(node2)
@@ -148,7 +148,7 @@ class Node:
         for successor in successors:
             fulfilled = False
             for formula in successor.formulas:
-                if check_formula == formula:
+                if check_formula == formula.formula_string:
                     fulfilled = True
                     break
             if not fulfilled:

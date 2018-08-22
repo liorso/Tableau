@@ -40,7 +40,7 @@ class Formula:
             return sub_formula_string[0], 0
 
         else:
-            assert self.is_elementary(sub_formula_string)
+            assert self.is_elementary(sub_formula_string) or sub_formula_string == '1' or sub_formula_string == '0'
             return None, 0
 
     def mark(self):

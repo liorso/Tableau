@@ -38,8 +38,8 @@ class Tableau:
         for node in self.pre_states.values():
             if not node.cloned and len(node.children) == 0:
                 node.cloned = True
-                new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO, initial=False,
-                                formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
+                new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO,
+                                initial=node.initial, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
                 node.children.add(new_node)
                 changed = True
         return changed
@@ -49,7 +49,8 @@ class Tableau:
             for formula in node.formulas:
                 if formula.is_true():
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
-                                    initial=False, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
+                                    initial=node.initial, formulas=node.formulas, rank=math.inf,
+                                    min_child_rank=math.inf)
                     node.children.add(new_node)
 
                 elif not formula.marked and not formula.is_elementary():
@@ -108,9 +109,9 @@ class Tableau:
         # if id == 1 (root) mark child as initial
         for pre_state in self.pre_states.values():
             assert pre_state.node_type == NodeType.PRE_STATE
-            if pre_state.id == 1:
-                for init_state in pre_state.children:
-                    init_state.init = True
+            #if pre_state.id == 1:
+            #    for init_state in pre_state.children:
+            #        init_state.init = True
             pre_state.remove()
         self.pre_states = {}
 
@@ -118,9 +119,9 @@ class Tableau:
         successors = node.find_all_successors()
         candidates = successors
         bad = successors
-        bad = bad.add(node)
+        bad.add(node)
         for successor in successors:
-            for parent in successor.parants:
+            for parent in successor.parents:
                 if parent not in bad:
                     candidates.remove(successor)
         candidates.add(node)
@@ -133,10 +134,14 @@ class Tableau:
 
     def remove_eventualities(self):
         removed = False
-        for state in self.states.values():
-            if state.has_unfulfilled_eventuality():
-                self.remove_state(state)
-                removed = True
+        changed_in_last_round = True
+        while changed_in_last_round
+            changed_in_last_round = False
+            for state in self.states.values():
+                if state.has_unfulfilled_eventuality():
+                    self.remove_state(state)
+                    removed = True
+                    changed_in_last_round = True
         return removed
 
     #TODO: Daniel, please check the logic still the same
@@ -148,7 +153,6 @@ class Tableau:
         while removed:
             removed = False
             for state in self.states.values():
-                print(len(state.children), state)
                 if len(state.children) == 0 and state.node_type != NodeType.REMOVED:
                     for parent in state.parents:
                         parent.children.remove(state)
@@ -157,6 +161,12 @@ class Tableau:
                     changed = True
         self.states = {node_id: node for node_id, node in self.states.items() if node.node_type != NodeType.REMOVED}
         return changed
+
+    def is_open(self):
+        for state in self.states.values():
+            if state.initial:
+                return True
+        return False
 
 
 def construct_pretableau(formula):
@@ -200,19 +210,25 @@ def build_tableau(formula):
     print('\n\nafter remove_prestates:')
     print(tableau)
     tableau.remove_inconsistent()
-    print('\n\nafter remove_inconsistent:')
-    print(tableau)
+    #print('\n\nafter remove_inconsistent:')
+    #print(tableau)
 
     changed = True
     while changed:
         changed = tableau.remove_eventualities()
         changed = tableau.remove_non_successors() or changed
 
-    # return tableau.is_open()
+    print('\n\nfinal tableau:')
+    print(tableau)
+    return tableau.is_open()
 
 
 def main():
-    build_tableau(Formula('F(!(!(((a)A(c))O((b)A(!(b))))))'))
+    satisfiable = build_tableau(Formula('F((a)A((b)A(!(b))))'))
+    if satisfiable:
+        print('Satisfiable!')
+    else:
+        print('Not Satisfiable :(')
 
 
 main()
