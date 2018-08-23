@@ -2,19 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="84cfb647-a4a6-45b1-a20c-df39b50b92e8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/BfsTableau/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BfsTableau/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/Tableau.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/common.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/formula.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DfsTableau/node.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tableau.py" beforeDir="false" afterPath="$PROJECT_DIR$/BfsTableau/Tableau.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/BfsTableau/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/formula.py" beforeDir="false" afterPath="$PROJECT_DIR$/BfsTableau/formula.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node.py" beforeDir="false" afterPath="$PROJECT_DIR$/BfsTableau/node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DfsTableau/Tableau.py" beforeDir="false" afterPath="$PROJECT_DIR$/DfsTableau/Tableau.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DfsTableau/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/DfsTableau/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -39,22 +28,22 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="17" />
+          <entry key="py" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="17" />
+          <entry key="Python" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="11493" />
+          <entry key="py" value="11720" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="11493" />
+          <entry key="Python" value="11720" />
         </counts>
       </usages-collector>
     </session>
@@ -74,6 +63,18 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BfsTableau/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="306">
+              <caret line="54" column="28" lean-forward="true" selection-start-line="40" selection-end-line="54" selection-end-column="28" />
+              <folding>
+                <marker date="1535014670807" expanded="true" signature="1503:1505" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DfsTableau/formula.py">
           <provider selected="true" editor-type-id="text-editor">
             <state>
@@ -85,11 +86,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DfsTableau/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="19" column="13" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
+            <state relative-caret-position="87">
+              <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
-                <marker date="1535017117227" expanded="true" signature="564:575" ph="..." />
+                <marker date="1535025050506" expanded="true" signature="1048:1050" ph="..." />
               </folding>
             </state>
           </provider>
@@ -110,12 +111,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DfsTableau/Tableau.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="191" column="24" lean-forward="true" selection-start-line="191" selection-start-column="24" selection-end-line="191" selection-end-column="24" />
+            <state relative-caret-position="-164">
+              <caret line="180" column="81" selection-start-line="180" selection-start-column="81" selection-end-line="180" selection-end-column="81" />
               <folding>
                 <element signature="e#0#61#0" expanded="true" />
-                <marker date="1535019190274" expanded="true" signature="6284:9467" ph="..." />
-                <marker date="1535019190274" expanded="true" signature="9485:9494" ph="..." />
+                <marker date="1535029933189" expanded="true" signature="6295:6521" ph="..." />
+                <marker date="1535029933189" expanded="true" signature="6547:10032" ph="..." />
+                <marker date="1535029933189" expanded="true" signature="10050:10059" ph="..." />
               </folding>
             </state>
           </provider>
@@ -156,6 +158,7 @@
       <find>root_nodes</find>
       <find>cloned</find>
       <find>root</find>
+      <find>is_child_in_tableau</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -172,8 +175,8 @@
         <option value="$PROJECT_DIR$/BfsTableau/main.py" />
         <option value="$PROJECT_DIR$/DfsTableau/formula.py" />
         <option value="$PROJECT_DIR$/DfsTableau/common.py" />
-        <option value="$PROJECT_DIR$/DfsTableau/main.py" />
         <option value="$PROJECT_DIR$/DfsTableau/node.py" />
+        <option value="$PROJECT_DIR$/DfsTableau/main.py" />
         <option value="$PROJECT_DIR$/DfsTableau/Tableau.py" />
       </list>
     </option>
@@ -329,12 +332,12 @@
     <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24330357" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24330357" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.21290323" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3483871" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3483871" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -387,16 +390,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BfsTableau/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="16" selection-end-column="18" />
-          <folding>
-            <marker date="1535014670807" expanded="true" signature="1503:1505" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/enum.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
@@ -421,6 +414,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/BfsTableau/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="54" column="28" lean-forward="true" selection-start-line="40" selection-end-line="54" selection-end-column="28" />
+          <folding>
+            <marker date="1535014670807" expanded="true" signature="1503:1505" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DfsTableau/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="87">
+          <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+            <marker date="1535025050506" expanded="true" signature="1048:1050" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/DfsTableau/node.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
@@ -431,25 +445,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DfsTableau/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="19" column="13" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-            <marker date="1535017117227" expanded="true" signature="564:575" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DfsTableau/Tableau.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="191" column="24" lean-forward="true" selection-start-line="191" selection-start-column="24" selection-end-line="191" selection-end-column="24" />
+        <state relative-caret-position="-164">
+          <caret line="180" column="81" selection-start-line="180" selection-start-column="81" selection-end-line="180" selection-end-column="81" />
           <folding>
             <element signature="e#0#61#0" expanded="true" />
-            <marker date="1535019190274" expanded="true" signature="6284:9467" ph="..." />
-            <marker date="1535019190274" expanded="true" signature="9485:9494" ph="..." />
+            <marker date="1535029933189" expanded="true" signature="6295:6521" ph="..." />
+            <marker date="1535029933189" expanded="true" signature="6547:10032" ph="..." />
+            <marker date="1535029933189" expanded="true" signature="10050:10059" ph="..." />
           </folding>
         </state>
       </provider>

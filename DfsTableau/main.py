@@ -17,8 +17,22 @@ def construct_next_branch(tableau):
 
 
 def check_is_next_branch_valid(tableau):
-    branch_root_node = tableau.get_next_branch()
-    pass
+    branch_tableau = tableau.get_next_branch()
+    branch_tableau.remove_prestates()
+    # print('\n\nafter remove_prestates:')
+    # print(branch_tableau)
+    branch_tableau.remove_inconsistent()
+    # print('\n\nafter remove_inconsistent:')
+    # print(branch_tableau)
+
+    changed = True
+    while changed:
+        changed = branch_tableau.remove_eventualities()
+        changed = branch_tableau.remove_non_successors() or changed
+
+    # print('\n\nfinal tableau:')
+    # print(branch_tableau)
+    return branch_tableau.is_open()
 
 
 def build_dfs_tableau(formula):
@@ -32,7 +46,6 @@ def build_dfs_tableau(formula):
         exit(0)
         if check_is_next_branch_valid(tableau):
             return True
-
     return False
 
     tableau = construct_pretableau(formula)

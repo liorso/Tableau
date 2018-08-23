@@ -155,27 +155,36 @@ class Tableau:
         self.states = {node_id: node for node_id, node in self.states.items() if node.node_type != NodeType.REMOVED}
         return changed
 
+    def is_child_in_tableau(self, child):
+        if child.node_type == NodeType.PRE_STATE:
+            return child.id in self.pre_states
+        if child.node_type == NodeType.STATE:
+            return child.id in self.states
+        assert False, "Not good?"
+
     def get_next_branch(self):
         new_tableau = Tableau()
         original_root = self.pre_states[1]
-        originl_curr_root = original_root
+        original_curr_root = original_root
         new_curr_root = Node(tableau=new_tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE,
                              initial=True, formulas=[original_root.formulas])
 
         while True:
-            if len(originl_curr_root.children) == 0:
+            if len(original_curr_root.children) == 0:
                 return new_tableau
 
-            elif len(originl_curr_root.children) == 1:
-                child = originl_curr_root.children.values()[0]
+            elif len(original_curr_root.children) == 1:
+                child = original_curr_root.children.values()[0]
+                if new_tableau.is_child_in_tableau(child):
+                    return new_tableau
                 new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(), node_type=child.node_type,
-                                initial=child.initial, formulas=[child.formulas]) # TODO intial
+                                initial=child.initial, formulas=[child.formulas])
                 new_curr_root.children.add(new_node)
                 new_curr_root = new_node
                 continue
 
-            elif len(originl_curr_root.children) == 2:
-                childs = originl_curr_root.values()
+            elif len(original_curr_root.children) == 2:
+                childs = original_curr_root.values()
                 if childs[0].node_type == NodeType.FUTURE:
                     new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
                                     node_type=childs[1].node_type, initial=childs[1].initial,
@@ -199,6 +208,8 @@ class Tableau:
                     childs[0].done_branch = True
 
                 elif childs[0].done_branch:
+                    if new_tableau.is_child_in_tableau(child):
+                        return new_tableau
                     new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
                                     node_type=childs[1].node_type, initial=childs[1].initial,
                                     formulas=[childs[1].formulas])
@@ -207,6 +218,8 @@ class Tableau:
 
                 else:
                     assert childs[1].done_branch, "WTF"
+                    if new_tableau.is_child_in_tableau(child):
+                        return new_tableau
                     new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
                                     node_type=childs[0].node_type, initial=childs[0].initial,
                                     formulas=[childs[0].formulas])
