@@ -1,37 +1,28 @@
-import math
-import copy
-from common import NodeType, TruthValue
-from node import Node
-from formula import Formula
-# TODO ranks and initial in node creations
-
+from DfsTableau.common import NodeType, TruthValue, BetaOrder
+from DfsTableau.node import Node
+from DfsTableau.formula import Formula
 
 class Tableau:
 
     def __init__(self):
-        self.root_nodes = {}
         self.pre_states = {}
         self.proto_states = {}
         self.states = {}
-
-        # TODO  - do we need?
-        self.state_to_pre = []
-        self.pre_to_state = []
+        self.future_states = []  # We use list as a stack cause we care about order
 
     def __repr__(self):
-        return f'pre_states: {self.pre_states}\n' \
-               f'proto_states: {self.proto_states}\nstates: {self.states}'
+        return f'pre_states: {self.pre_states}\nproto_states: {self.proto_states}\n' \
+               f'future_states: {self.future_states}\nstates: {self.states}'
 
     def insert(self, node):
         if node.node_type == NodeType.PRE_STATE:
             self.pre_states[node.id] = node
-        if node.node_type == NodeType.STATE:
+        elif node.node_type == NodeType.STATE:
             self.states[node.id] = node
-        if node.node_type == NodeType.PROTO:
+        elif node.node_type == NodeType.PROTO:
             self.proto_states[node.id] = node
-
-        if node.initial:
-            self.root_nodes[node.id] = node
+        elif node.node_type == NodeType.FUTURE:
+            self.future_states.append(node)
 
     def clone(self):
         changed = False
@@ -39,7 +30,7 @@ class Tableau:
             if not node.cloned and len(node.children) == 0:
                 node.cloned = True
                 new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.PROTO,
-                                initial=node.initial, formulas=node.formulas, rank=math.inf, min_child_rank=math.inf)
+                                initial=node.initial, formulas=node.formulas)
                 node.children.add(new_node)
                 changed = True
         return changed
@@ -49,8 +40,7 @@ class Tableau:
             for formula in node.formulas:
                 if formula.is_true():
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
-                                    initial=node.initial, formulas=node.formulas, rank=math.inf,
-                                    min_child_rank=math.inf)
+                                    initial=node.initial, formulas=node.formulas)
                     node.children.add(new_node)
 
                 elif not formula.marked and not formula.is_elementary():
@@ -98,36 +88,40 @@ class Tableau:
 
                     if not found_pre_state:
                         new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
-                                    initial=False, formulas=next_formulas, rank=math.inf, min_child_rank=math.inf)
+                                        initial=False, formulas=next_formulas)
                         state.children.add(new_node)
 
     def __eq__(self, other):
-        return self.root_nodes == other.root_nodes and self.pre_states == other.pre_states \
+        return self.pre_states == other.pre_states \
                and self.proto_states == other.proto_states and self.states == other.states
 
     def remove_prestates(self):
-        # if id == 1 (root) mark child as initial
         for pre_state in self.pre_states.values():
             assert pre_state.node_type == NodeType.PRE_STATE
-            #if pre_state.id == 1:
-            #    for init_state in pre_state.children:
-            #        init_state.init = True
             pre_state.remove()
         self.pre_states = {}
 
-    def remove_state(self, node):
+    @staticmethod
+    def remove_state(node):
         successors = node.find_all_successors()
         candidates = successors
         bad = successors
         bad.add(node)
-        for successor in successors:
-            for parent in successor.parents:
-                if parent not in bad:
-                    candidates.remove(successor)
+
+        changed = True
+        while changed:
+            changed = False
+            for successor in successors:
+                for parent in successor.parents:
+                    if parent not in bad:
+                        changed = True
+                        candidates.remove(successor)
+                        bad.remove(successor)
+
         candidates.add(node)
         for node_to_remove in candidates:
             node_to_remove.simple_remove()
-            self.states.remove(node_to_remove)
+        return candidates
 
     def remove_inconsistent(self):
         self.remove_non_successors()
@@ -135,18 +129,17 @@ class Tableau:
     def remove_eventualities(self):
         removed = False
         changed_in_last_round = True
-        while changed_in_last_round
+
+        while changed_in_last_round:
             changed_in_last_round = False
             for state in self.states.values():
-                if state.has_unfulfilled_eventuality():
+                if state.node_type != NodeType.REMOVED and state.has_unfulfilled_eventuality():
                     self.remove_state(state)
                     removed = True
                     changed_in_last_round = True
+        self.states = {node_id: node for node_id, node in self.states.items() if node.node_type != NodeType.REMOVED}
         return removed
 
-    #TODO: Daniel, please check the logic still the same
-    #1. remove is now bool
-    #2. last line change to node.node_type != NodeType.REMOVED and not ==
     def remove_non_successors(self):
         changed = False
         removed = True
@@ -162,73 +155,72 @@ class Tableau:
         self.states = {node_id: node for node_id, node in self.states.items() if node.node_type != NodeType.REMOVED}
         return changed
 
+    def get_next_branch(self):
+        new_tableau = Tableau()
+        original_root = self.pre_states[1]
+        originl_curr_root = original_root
+        new_curr_root = Node(tableau=new_tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE,
+                             initial=True, formulas=[original_root.formulas])
+
+        while True:
+            if len(originl_curr_root.children) == 0:
+                return new_tableau
+
+            elif len(originl_curr_root.children) == 1:
+                child = originl_curr_root.children.values()[0]
+                new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(), node_type=child.node_type,
+                                initial=child.initial, formulas=[child.formulas]) # TODO intial
+                new_curr_root.children.add(new_node)
+                new_curr_root = new_node
+                continue
+
+            elif len(originl_curr_root.children) == 2:
+                childs = originl_curr_root.values()
+                if childs[0].node_type == NodeType.FUTURE:
+                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
+                                    node_type=childs[1].node_type, initial=childs[1].initial,
+                                    formulas=[childs[1].formulas])
+                    new_curr_root.children.add(new_node)
+                    new_curr_root = new_node
+                    childs[0].node_type = NodeType.PRE_STATE
+                    self.future_states.remove(childs[0])
+                    self.pre_states[childs[0].id] = childs[0]
+                    childs[1].done_branch = True
+
+                elif childs[1].node_type == NodeType.FUTURE:
+                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
+                                    node_type=childs[0].node_type, initial=childs[0].initial,
+                                    formulas=[childs[0].formulas])
+                    new_curr_root.children.add(new_node)
+                    new_curr_root = new_node
+                    childs[1].node_type = NodeType.PRE_STATE
+                    self.future_states.remove(childs[1])
+                    self.pre_states[childs[1].id] = childs[1]
+                    childs[0].done_branch = True
+
+                elif childs[0].done_branch:
+                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
+                                    node_type=childs[1].node_type, initial=childs[1].initial,
+                                    formulas=[childs[1].formulas])
+                    new_curr_root.children.add(new_node)
+                    new_curr_root = new_node
+
+                else:
+                    assert childs[1].done_branch, "WTF"
+                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
+                                    node_type=childs[0].node_type, initial=childs[0].initial,
+                                    formulas=[childs[0].formulas])
+                    new_curr_root.children.add(new_node)
+                    new_curr_root = new_node
+
+                continue
+
+            assert False, "wtf??"
+
+
     def is_open(self):
         for state in self.states.values():
             if state.initial:
                 return True
         return False
 
-
-def construct_pretableau(formula):
-    tableau = Tableau()
-    Node(tableau=tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE, initial=True,
-         formulas=[formula], rank=math.inf, min_child_rank=math.inf)
-
-    #print('start loop:')
-    #print(tableau)
-    i = 0
-    while True:
-        #input(f'start loop {i}')
-        if not tableau.clone():
-            # clone() didn't change the tableau, no need to continue
-            break
-        #print('\nafter clone:')
-        #print(tableau)
-
-        tableau.apply_alpha_beta()
-        #print('\nafter alpha beta')
-        #print(tableau)
-        tableau.remove_proto_states()
-        #print('\nafter remove proto')
-        #print(tableau)
-        if i == 2:
-            import pdb
-            #pdb.set_trace()
-        tableau.next_rule()
-        #print('\nafter next')
-        #print(tableau)
-        i += 1
-
-    return tableau
-
-
-def build_tableau(formula):
-    tableau = construct_pretableau(formula)
-    print('after construct_pretableau:')
-    print(tableau)
-    tableau.remove_prestates() #TODO: bug with init flag
-    print('\n\nafter remove_prestates:')
-    print(tableau)
-    tableau.remove_inconsistent()
-    #print('\n\nafter remove_inconsistent:')
-    #print(tableau)
-
-    changed = True
-    while changed:
-        changed = tableau.remove_eventualities()
-        changed = tableau.remove_non_successors() or changed
-
-    print('\n\nfinal tableau:')
-    print(tableau)
-    return tableau.is_open()
-
-
-def main():
-    satisfiable = build_tableau(Formula('F((a)A((b)A(!(b))))'))
-    if satisfiable:
-        print('Satisfiable!')
-    else:
-        print('Not Satisfiable :(')
-
-
-main()

@@ -1,13 +1,12 @@
 import copy
-import math
-from common import NodeType, Connective
-from formula import Formula
+from DfsTableau.common import NodeType, Connective, BetaOrder
+from DfsTableau.formula import Formula
 
 
 class Node:
     id = 0
 
-    def __init__(self, tableau, parents, children, node_type, initial, formulas, rank, min_child_rank):
+    def __init__(self, tableau, parents, children, node_type, initial, formulas, beta_order=BetaOrder.NONE):
         Node.id += 1
         self.id = Node.id
         self.tableau = tableau
@@ -16,19 +15,17 @@ class Node:
         self.node_type = node_type
         self.initial = initial
         self.formulas = set(copy.deepcopy(formulas))
-        self.rank = rank
-        self.min_child_rank = min_child_rank
         self.cloned = False
         self.find_succesor_visited = False
-
+        self.beta_order = beta_order
+        self.done_branch = False
 
         tableau.insert(self)
 
     def __repr__(self):
         return f'id: {self.id}, parents: {[node.id for node in self.parents]}, ' \
                f'children: {[node.id for node in self.children]}, node_type: {self.node_type} ' \
-               f'initial: {self.initial}, formulas: {self.formulas}, rank: {self.rank}, ' \
-               f'min_child_rank: {self.min_child_rank}, cloned: {self.cloned}'
+               f'initial: {self.initial}, formulas: {self.formulas}, cloned: {self.cloned}'
 
     def __eq__(self, other):
         return self.id == other.id
@@ -41,7 +38,7 @@ class Node:
         new_formulas.update(formulas)
 
         node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+                     initial=self.initial, formulas=new_formulas)
 
         self.children.add(node1)
 
@@ -50,12 +47,12 @@ class Node:
         new_formulas.update({formulas.pop()})
 
         node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+                     initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
 
         new_formulas = set(self.formulas)
         new_formulas.update(formulas)
-        node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=self.initial, formulas=new_formulas, rank=math.inf, min_child_rank=math.inf)
+        node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
+                     initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
 
         self.children.add(node1)
         self.children.add(node2)
@@ -93,10 +90,13 @@ class Node:
     def find_all_successors_rec(self):
         if self.find_succesor_visited:
             return set()
+
         self.find_succesor_visited = True
-        successors = set(self.children)
+        successors = {child for child in self.children if child.node_type != NodeType.REMOVED}
+
         for child in self.children:
             successors.update(child.find_all_successors_rec())
+
         return successors
 
     def simple_remove(self):
@@ -161,7 +161,7 @@ class Node:
             symbol, index = eventuality.find_next_symbol(eventuality.formula_string)
             if symbol == Connective.FINALLY.value and not self.fulfilled_finally(eventuality.formula_string[2:-1]):
                 return True
-            if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],\
+            if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],
                                                                              eventuality.formula_string[index + 2:-1]):
                 return True
             if not self.fulfilled_not_globally(eventuality.formula_string[4:-2]):

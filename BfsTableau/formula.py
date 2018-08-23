@@ -1,4 +1,4 @@
-from common import Connective, TruthValue, UNARY_CONNECTIVES, BINARY_CONNECTIVES
+from BfsTableau.common import Connective, TruthValue, UNARY_CONNECTIVES, BINARY_CONNECTIVES
 
 
 class Formula:
