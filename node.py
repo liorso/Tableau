@@ -55,26 +55,29 @@ class Node:
     def handle_beta(self, formulas):
         new_formulas = set(self.formulas)
         new_formulas.update({formulas.pop()})
-
         if self.tableau.type == TableauType.BFS:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                          initial=self.initial, formulas=new_formulas)
         else:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                          initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
-
-        new_formulas = set(self.formulas)
-        new_formulas.update(formulas)
-
-        if self.tableau.type == TableauType.BFS:
-            node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                         initial=self.initial, formulas=new_formulas)
-        else:
-            node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
-                         initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
-
         self.children.add(node1)
-        self.children.add(node2)
+
+        # we might have gotten only 1 formula, this can happen if both parts were identical
+        if len(formulas) > 0:
+            new_formulas = set(self.formulas)
+            new_formulas.update(formulas)
+
+            if self.tableau.type == TableauType.BFS:
+                node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                             initial=self.initial, formulas=new_formulas)
+            else:
+                node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
+                             initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
+
+            self.children.add(node2)
+
+
 
     def is_consistent(self):
         for formula in self.formulas:
