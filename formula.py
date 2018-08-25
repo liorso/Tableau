@@ -1,4 +1,4 @@
-from BfsTableau.common import Connective, TruthValue, UNARY_CONNECTIVES, BINARY_CONNECTIVES
+from common import Connective, TruthValue, UNARY_CONNECTIVES, BINARY_CONNECTIVES
 
 
 class Formula:
@@ -135,7 +135,7 @@ class Formula:
 
     def is_true(self, sub_formula=None):
         formula_string = sub_formula or self.formula_string
-        return self.formula_string == TruthValue.TRUE.value
+        return formula_string == TruthValue.TRUE.value
 
     def is_next(self, sub_formula=None):
         formula_string = sub_formula or self.formula_string

@@ -1,14 +1,19 @@
 import copy
-from DfsTableau.common import NodeType, Connective, BetaOrder
-from DfsTableau.formula import Formula
+from common import NodeType, Connective, BetaOrder
+from formula import Formula
 
 
 class Node:
     id = 0
 
-    def __init__(self, tableau, parents, children, node_type, initial, formulas, beta_order=BetaOrder.NONE):
-        Node.id += 1
-        self.id = Node.id
+    def __init__(self, tableau, parents, children, node_type, initial, formulas, beta_order=BetaOrder.NONE,
+                 node_id=None):
+        if node_id:
+            self.id = node_id
+        else:
+            Node.id += 1
+            self.id = Node.id
+
         self.tableau = tableau
         self.parents = parents if type(parents) == set else {parents}
         self.children = children if type(children) == set else {children}
@@ -16,7 +21,7 @@ class Node:
         self.initial = initial
         self.formulas = set(copy.deepcopy(formulas))
         self.cloned = False
-        self.find_succesor_visited = False
+        self.find_successor_visited = False
         self.beta_order = beta_order
         self.done_branch = False
 
@@ -25,7 +30,9 @@ class Node:
     def __repr__(self):
         return f'id: {self.id}, parents: {[node.id for node in self.parents]}, ' \
                f'children: {[node.id for node in self.children]}, node_type: {self.node_type} ' \
-               f'initial: {self.initial}, formulas: {self.formulas}, cloned: {self.cloned}'
+               f'initial: {self.initial}, formulas: {self.formulas}, cloned: {self.cloned}, ' \
+               f'find_successor_visited: {self.find_successor_visited}, beta_order: {self.beta_order}, ' \
+               f'done_branch: {self.done_branch}'
 
     def __eq__(self, other):
         return self.id == other.id
@@ -77,21 +84,21 @@ class Node:
             child.parents.remove(self)
             child.parents.update(self.parents)
 
-    def clear_find_succesor_visited_flag(self, successors):
-        self.find_succesor_visited = False
+    def clear_find_successor_visited_flag(self, successors):
+        self.find_successor_visited = False
         for successor in successors:
-            successor.find_succesor_visited = False
+            successor.find_successor_visited = False
 
     def find_all_successors(self):
         successors = self.find_all_successors_rec()
-        self.clear_find_succesor_visited_flag(successors)
+        self.clear_find_successor_visited_flag(successors)
         return successors
 
     def find_all_successors_rec(self):
-        if self.find_succesor_visited:
+        if self.find_successor_visited:
             return set()
 
-        self.find_succesor_visited = True
+        self.find_successor_visited = True
         successors = {child for child in self.children if child.node_type != NodeType.REMOVED}
 
         for child in self.children:
@@ -122,13 +129,13 @@ class Node:
     def fulfilled_until(self, first_formula, second_formula):
         successors = self.find_all_successors()
         ans = self.fulfilled_until_rec(first_formula, second_formula)
-        self.clear_find_succesor_visited_flag(successors)
+        self.clear_find_successor_visited_flag(successors)
         return ans
 
     def fulfilled_until_rec(self, first_formula, second_formula):
-        if self.find_succesor_visited:
+        if self.find_successor_visited:
             return False
-        self.find_succesor_visited = True
+        self.find_successor_visited = True
         first_formula_exists = False
         for formula in self.formulas:
             if second_formula == formula.formula_string:
