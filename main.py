@@ -4,6 +4,7 @@ from formula import Formula
 
 
 def main():
+
     test_cases = [('!(!(a))', True),
                   ('(a)A(b)', True),
                   ('!((a)O(b))', True),
@@ -23,7 +24,11 @@ def main():
                   ('((a)A(!(a)))O((b)A(!(b)))', False),
                   ('((a)A(!(a)))O((a)A(!(a)))', False),
                   ('(((a)A(!(a)))O((a)A(!(a))))A(c)', False),
-                  ('(((a)A(!(a)))O((a)A(!(a))))O(c)', True)
+                  ('(((a)A(!(a)))O((a)A(!(a))))O(c)', True),
+                  ('(((a)A(!(a)))O((a)A(!(a))))O(c)', True),
+                  ('(((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a)))', True)
+                  # ('((a)O(!(b)))A((b)O(!(c)))', True),  TODO - fails in DFS
+                  # ('((((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a))))A(!(a))', False) TODO - fails
                   ]
 
     errors = []

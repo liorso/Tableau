@@ -77,8 +77,6 @@ class Node:
 
             self.children.add(node2)
 
-
-
     def is_consistent(self):
         for formula in self.formulas:
             if formula.formula_string[0] == Connective.NOT.value:
