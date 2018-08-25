@@ -41,7 +41,14 @@ class DfsTableau:
         changed = True
         while changed:
             changed = branch_tableau.remove_eventualities()
+            if self.debug:
+                print('\n\nafter remove_eventualities:')
+                print(branch_tableau)
+
             changed = branch_tableau.remove_non_successors() or changed
+            if self.debug:
+                print('\n\nafter remove_non_successors:')
+                print(branch_tableau)
 
         if self.debug:
             print('\n\nfinal tableau:')
@@ -53,15 +60,22 @@ class DfsTableau:
         Node(tableau=self.tableau, parents=set(), children=set(), node_type=NodeType.FUTURE, initial=True,
              formulas=[self.formula])
 
-        while len(self.tableau.future_states) > 0:
+        build_next_branch = True
+        while build_next_branch:
             self.construct_next_branch()
 
             if self.debug:
                 print('next branch\n')
                 print(self.tableau)
 
+            build_next_branch = len(self.tableau.future_states) > 0
+
             if self.check_is_next_branch_valid():
                 Node.id = 0
                 return True
+
+            if self.debug:
+                print('last branch was not valid, check next branch, tableau is:\n')
+                print(self.tableau)
         Node.id = 0
         return False

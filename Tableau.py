@@ -87,7 +87,7 @@ class Tableau:
                             pre_state.parents.add(state)
                             state.children.add(pre_state)
                             found_pre_state = True
-                            continue
+                            break
 
                     if not found_pre_state:
                         new_node = Node(tableau=self, parents=state, children=set(), node_type=NodeType.PRE_STATE,
@@ -203,9 +203,6 @@ class Tableau:
                                     formulas=[children[1].formulas], node_id=children[1].id)
                     new_curr_root.children.add(new_node)
                     new_curr_root = new_node
-                    children[0].node_type = NodeType.PRE_STATE
-                    self.future_states.remove(children[0])
-                    self.pre_states[children[0].id] = children[0]
                     children[1].done_branch = True
                     original_curr_root = children[1]
 
@@ -215,9 +212,6 @@ class Tableau:
                                     formulas=children[0].formulas, node_id=children[0].id)
                     new_curr_root.children.add(new_node)
                     new_curr_root = new_node
-                    children[1].node_type = NodeType.PRE_STATE
-                    self.future_states.remove(children[1])
-                    self.pre_states[children[1].id] = children[1]
                     children[0].done_branch = True
                     original_curr_root = children[0]
 

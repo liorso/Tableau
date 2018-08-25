@@ -59,7 +59,14 @@ class BfsTableau:
         changed = True
         while changed:
             changed = self.tableau.remove_eventualities()
+            if self.debug:
+                print('\n\nafter remove_eventualities:')
+                print(self.tableau)
+
             changed = self.tableau.remove_non_successors() or changed
+            if self.debug:
+                print('\n\nafter remove_non_successors:')
+                print(self.tableau)
 
         if self.debug:
             print('\n\nfinal tableau:')

@@ -9,30 +9,29 @@ def main():
                         '(a)A(!(a))', '!((a)A(!(a)))']
     expected_results = [True, True, True, True, True, True, True, True, True, True, True, True, False, False, True]
 
-    bfs_to_dfs_errors = []
-    result_to_expected_errors = []
+    errors = []
 
     assert len(expected_results) == len(formulas_strings)
+    iterations = 100
 
-    for formula_string, expected_result in zip(formulas_strings, expected_results):
-        print(f'checking formula {formula_string}')
+    for i in range(iterations):
+        for formula_string, expected_result in zip(formulas_strings, expected_results):
 
-        dfs_result = DfsTableau(Formula(formula_string), debug=False).build_tableau()
-        bfs_result = BfsTableau(Formula(formula_string), debug=False).build_tableau()
+            dfs_result = DfsTableau(Formula(formula_string), debug=False).build_tableau()
+            bfs_result = BfsTableau(Formula(formula_string), debug=False).build_tableau()
 
-        print(f'dfs_result: {dfs_result}, bfs_result {bfs_result}')
+            if dfs_result != bfs_result or bfs_result != expected_result:
+                errors.append(f'checked formula: {formula_string}, expected_result: {expected_result} '
+                              f'bfs result: {bfs_result}, dfs result: {dfs_result}')
 
-        if dfs_result != bfs_result:
-            bfs_to_dfs_errors.append(formula_string)
-        elif bfs_result != expected_result:
-            result_to_expected_errors.append(formula_string)
+        if len(errors) > 0:
+            print(f'\nafter {i} iterations got the following errors:')
+            for error in errors:
+                print(error)
+            break
 
-    if len(bfs_to_dfs_errors) > 0:
-        print(f'\nthe following formulas did not match between bfs and dfs:{bfs_to_dfs_errors}')
-    if len(result_to_expected_errors) > 0:
-        print(f'\nthe following formulas matched between bfs and dfs, but not to expected:{result_to_expected_errors}')
-    if len(bfs_to_dfs_errors) == 0 and len(result_to_expected_errors) == 0:
-        print('\nall formulas match')
+    if len(errors) == 0:
+        print(f'\nall formulas match, checked {iterations} times')
 
 
 if __name__ == "__main__":

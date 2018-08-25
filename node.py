@@ -154,6 +154,7 @@ class Node:
                 return True
             if first_formula == formula.formula_string:
                 first_formula_exists = True
+
         if not first_formula_exists:
             return False
         for child in self.children:
@@ -178,6 +179,7 @@ class Node:
         eventualities = self.find_eventualities()
         for eventuality in eventualities:
             symbol, index = eventuality.find_next_symbol(eventuality.formula_string)
+
             if symbol == Connective.FINALLY.value and not self.fulfilled_finally(eventuality.formula_string[2:-1]):
                 return True
             if symbol == Connective.UNTIL.value and not self.fulfilled_until(eventuality.formula_string[1:index - 1],
