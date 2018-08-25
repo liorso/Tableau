@@ -1,11 +1,11 @@
 from node import Node
-from common import NodeType
+from common import NodeType, TableauType
 from Tableau import Tableau
 
 
 class DfsTableau:
     def __init__(self, formula, debug=False):
-        self.tableau = Tableau()
+        self.tableau = Tableau(tableau_type=TableauType.DFS)
         self.formula = formula
         self.debug = debug
 

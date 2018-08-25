@@ -1,15 +1,16 @@
-from common import NodeType, TruthValue
+from common import NodeType, TruthValue, TableauType
 from node import Node
 from formula import Formula
 
 
 class Tableau:
 
-    def __init__(self):
+    def __init__(self, tableau_type):
         self.pre_states = {}
         self.proto_states = {}
         self.states = {}
         self.future_states = []  # We use list as a stack cause we care about order
+        self.type = tableau_type
 
     def __repr__(self):
         return f'pre_states: {self.pre_states}\nproto_states: {self.proto_states}\n' \
@@ -23,6 +24,7 @@ class Tableau:
         elif node.node_type == NodeType.PROTO:
             self.proto_states[node.id] = node
         elif node.node_type == NodeType.FUTURE:
+            assert self.type == TableauType.DFS
             self.future_states.append(node)
 
     def clone(self):
@@ -165,7 +167,9 @@ class Tableau:
         assert False, "Not good?"
 
     def get_next_branch(self):
-        new_tableau = Tableau()
+        assert self.type == TableauType.DFS
+        new_tableau = Tableau(tableau_type=TableauType.DFS)
+
         original_root = self.pre_states[1]
         original_curr_root = original_root
         new_curr_root = Node(tableau=new_tableau, parents=set(), children=set(), node_type=NodeType.PRE_STATE,

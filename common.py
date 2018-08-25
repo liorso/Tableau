@@ -33,5 +33,10 @@ class BetaOrder(enum.IntEnum):
     SECOND = 2
 
 
+class TableauType(enum.Enum):
+    BFS = 'bfs'
+    DFS = 'dfs'
+
+
 UNARY_CONNECTIVES = [Connective.NOT.value, Connective.GLOBALLY.value, Connective.NEXT.value, Connective.FINALLY.value]
 BINARY_CONNECTIVES = [Connective.AND.value, Connective.OR.value, Connective.IMPLIES.value, Connective.UNTIL.value]

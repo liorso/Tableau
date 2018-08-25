@@ -1,5 +1,5 @@
 import copy
-from common import NodeType, Connective, BetaOrder
+from common import NodeType, Connective, BetaOrder, TableauType
 from formula import Formula
 
 
@@ -24,6 +24,9 @@ class Node:
         self.find_successor_visited = False
         self.beta_order = beta_order
         self.done_branch = False
+
+        if beta_order != BetaOrder.NONE or node_type == NodeType.FUTURE:
+            assert self.tableau.type == TableauType.DFS
 
         tableau.insert(self)
 
@@ -53,13 +56,22 @@ class Node:
         new_formulas = set(self.formulas)
         new_formulas.update({formulas.pop()})
 
-        node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
+        if self.tableau.type == TableauType.BFS:
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                         initial=self.initial, formulas=new_formulas)
+        else:
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                         initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
 
         new_formulas = set(self.formulas)
         new_formulas.update(formulas)
-        node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
-                     initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
+
+        if self.tableau.type == TableauType.BFS:
+            node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                         initial=self.initial, formulas=new_formulas)
+        else:
+            node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
+                         initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
 
         self.children.add(node1)
         self.children.add(node2)

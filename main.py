@@ -28,11 +28,11 @@ def main():
             result_to_expected_errors.append(formula_string)
 
     if len(bfs_to_dfs_errors) > 0:
-        print(f' the following formulas did not match between bfs and dfs:{bfs_to_dfs_errors}')
+        print(f'\nthe following formulas did not match between bfs and dfs:{bfs_to_dfs_errors}')
     if len(result_to_expected_errors) > 0:
-        print(f' the following formulas matched between bfs and dfs, but not to expected:{result_to_expected_errors}')
+        print(f'\nthe following formulas matched between bfs and dfs, but not to expected:{result_to_expected_errors}')
     if len(bfs_to_dfs_errors) == 0 and len(result_to_expected_errors) == 0:
-        print('all formulas match')
+        print('\nall formulas match')
 
 
 if __name__ == "__main__":
