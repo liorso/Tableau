@@ -40,8 +40,9 @@ class Tableau:
 
     def apply_alpha_beta(self):
         for node in self.proto_states.values():
+            node_has_children = False
             for formula in node.formulas:
-                if formula.is_true():
+                if formula.is_true():  # TODO: if node_has_children???
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
                                     initial=node.initial, formulas=node.formulas)
                     node.children.add(new_node)
@@ -52,13 +53,15 @@ class Tableau:
                     is_alpha, formulas = formula.is_alpha()
                     formulas = {Formula(formulas[0]), Formula(formulas[1])}
                     if is_alpha:
-                        node.handle_alpha(formulas)
+                        node.handle_alpha(formulas, node_has_children)
+                        node_has_children = True
 
                     else:
                         is_beta, formulas = formula.is_beta()
                         formulas = {Formula(formulas[0]), Formula(formulas[1])}
                         assert is_beta, 'formula must be alpha/beta/elementary'
-                        node.handle_beta(formulas)
+                        node.handle_beta(formulas, node_has_children)
+                        node_has_children = True
 
             if len(node.children) == 0:
                 node.node_type = NodeType.STATE
@@ -126,6 +129,18 @@ class Tableau:
             node_to_remove.simple_remove()
         return candidates
 
+    #TODO: static and without patameter node
+    def find_child_to_handle(self, node, children):
+        for child in children:
+            if child.node_type == NodeType.PRE_STATE and not child.done_branch:
+                return child
+        node.done_branch = True
+
+        print(self)
+        print('node id with problem:', node.id)
+        print(children)
+        assert False, 'child does not found'
+
     def remove_inconsistent(self):
         self.remove_non_successors()
 
@@ -180,7 +195,8 @@ class Tableau:
                 return new_tableau
 
             elif len(original_curr_root.children) == 1:
-                child = original_curr_root.children.pop()
+                child = original_curr_root.children.pop()  # TODO: pop deletes the element, do we want it??
+                original_curr_root.children.add(child)
 
                 child_in_new_tableau = new_tableau.is_child_in_tableau(child)
                 if child_in_new_tableau:
@@ -195,57 +211,16 @@ class Tableau:
                 original_curr_root = child
                 continue
 
-            elif len(original_curr_root.children) == 2:
-                children = list(original_curr_root.children)
-                if children[0].node_type == NodeType.FUTURE:
-                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
-                                    node_type=children[1].node_type, initial=children[1].initial,
-                                    formulas=[children[1].formulas], node_id=children[1].id)
-                    new_curr_root.children.add(new_node)
-                    new_curr_root = new_node
-                    children[1].done_branch = True
-                    original_curr_root = children[1]
-
-                elif children[1].node_type == NodeType.FUTURE:
-                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
-                                    node_type=children[0].node_type, initial=children[0].initial,
-                                    formulas=children[0].formulas, node_id=children[0].id)
-                    new_curr_root.children.add(new_node)
-                    new_curr_root = new_node
-                    children[0].done_branch = True
-                    original_curr_root = children[0]
-
-                elif children[0].done_branch:
-                    child_in_new_tableau = new_tableau.is_child_in_tableau(children[1])
-                    if child_in_new_tableau:
-                        child_in_new_tableau.parents.add(new_curr_root)
-                        new_curr_root.children.add(child_in_new_tableau)
-                        return new_tableau
-
-                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
-                                    node_type=children[1].node_type, initial=children[1].initial,
-                                    formulas=children[1].formulas, node_id=children[1].id)
-                    new_curr_root.children.add(new_node)
-                    new_curr_root = new_node
-                    original_curr_root = children[1]
-
-                else:
-                    assert children[1].done_branch, "WTF"
-                    child_in_new_tableau = new_tableau.is_child_in_tableau(children[0])
-                    if child_in_new_tableau:
-                        child_in_new_tableau.parents.add(new_curr_root)
-                        new_curr_root.children.add(child_in_new_tableau)
-                        return new_tableau
-
-                    new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
-                                    node_type=children[0].node_type, initial=children[0].initial,
-                                    formulas=[children[0].formulas], node_id=children[0].id)
-                    new_curr_root.children.add(new_node)
-                    new_curr_root = new_node
-                    original_curr_root = children[0]
+            else:  # len(original_curr_root.children) > 1
+                child = self.find_child_to_handle(original_curr_root, original_curr_root.children)
+                new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
+                                node_type=child.node_type, initial=child.initial,
+                                formulas=child.formulas, node_id=child.id)
+                new_curr_root.children.add(new_node)
+                new_curr_root = new_node
+                original_curr_root = child
                 continue
 
-            assert False, "wtf??"
 
     def is_open(self):
         for state in self.states.values():

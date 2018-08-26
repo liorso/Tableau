@@ -26,9 +26,9 @@ def main():
                   ('(((a)A(!(a)))O((a)A(!(a))))A(c)', False),
                   ('(((a)A(!(a)))O((a)A(!(a))))O(c)', True),
                   ('(((a)A(!(a)))O((a)A(!(a))))O(c)', True),
-                  ('(((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a)))', True)
-                  # ('((a)O(!(b)))A((b)O(!(c)))', True),  TODO - fails in DFS
-                  # ('((((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a))))A(!(a))', False) TODO - fails
+                  ('(((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a)))', True),
+                  ('((a)O(!(b)))A((b)O(!(c)))', True),  # TODO - fails in DFS
+                  ('((((a)O(!(b)))A((b)O(!(c))))A((c)O(!(a))))A(!(a))', True)  # TODO - fails
                   ]
 
     errors = []
@@ -43,8 +43,11 @@ def main():
             bfs_result = BfsTableau(Formula(formula_string), debug=False).build_tableau()
 
             if dfs_result != bfs_result or bfs_result != expected_result:
-                errors.append(f'checked formula: {formula_string}, expected_result: {expected_result} '
+              errors.append(f'checked formula: {formula_string}, expected_result: {expected_result} '
                               f'bfs result: {bfs_result}, dfs result: {dfs_result}')
+            # if bfs_result != expected_result:
+            #    errors.append(f'checked formula: {formula_string}, expected_result: {expected_result} '
+            #                  f'bfs result: {bfs_result}')
 
         if len(errors) > 0:
             print(f'\nafter {i} iterations got the following errors:')
