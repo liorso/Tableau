@@ -107,11 +107,10 @@ class Tableau:
             pre_state.remove()
         self.pre_states = {}
 
-    @staticmethod
-    def remove_state(node):
+    def remove_state(self, node):
         successors = node.find_all_successors()
-        candidates = successors
-        bad = successors
+        candidates = set(successors)
+        bad = set(successors)
         bad.add(node)
 
         changed = True
@@ -121,8 +120,14 @@ class Tableau:
                 for parent in successor.parents:
                     if parent not in bad:
                         changed = True
-                        candidates.remove(successor)
-                        bad.remove(successor)
+                        try:
+                            candidates.remove(successor)
+                            bad.remove(successor)
+                            break
+                        except:
+                            import pdb
+                            pdb.set_trace()
+            successors = set(candidates)
 
         candidates.add(node)
         for node_to_remove in candidates:

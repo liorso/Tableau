@@ -12,12 +12,12 @@ class NodeType(enum.Enum):
 class Connective(enum.Enum):
     OPEN = '('
     CLOSE = ')'
-    NOT = '!'
+    NOT = '~'
     GLOBALLY = 'G'
     NEXT = 'X'
     FINALLY = 'F'
-    AND = 'A'
-    OR = 'O'
+    AND = '&'
+    OR = '|'
     IMPLIES = '>'
     UNTIL = 'U'
 
