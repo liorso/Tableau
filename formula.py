@@ -145,8 +145,8 @@ class Formula:
 
     def is_elementary(self, sub_formula=None):
         formula_string = sub_formula or self.formula_string
-        is_atomic = len(formula_string) == 1 and formula_string.islower()
-        is_atomic_negation = (len(formula_string) == 4 and formula_string[2].islower() and
+        is_atomic = len(formula_string) == 4 and formula_string.islower()
+        is_atomic_negation = (len(formula_string) == 7 and formula_string[2].islower() and
                               formula_string[0] == Connective.NOT.value)
         is_next = self.is_next(formula_string)
 
