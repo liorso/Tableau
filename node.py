@@ -49,10 +49,10 @@ class Node:
 
         if self.tableau.type == TableauType.DFS and node_has_children:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
-                     initial=self.initial, formulas=new_formulas)
+                         initial=self.initial, formulas=new_formulas)
         else:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
-                     initial=self.initial, formulas=new_formulas)
+                         initial=self.initial, formulas=new_formulas)
         self.children.add(node1)
 
     def handle_beta(self, formulas, node_has_children):

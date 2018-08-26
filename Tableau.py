@@ -42,7 +42,7 @@ class Tableau:
         for node in self.proto_states.values():
             node_has_children = False
             for formula in node.formulas:
-                if formula.is_true():  # TODO: if node_has_children???
+                if formula.is_true():
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
                                     initial=node.initial, formulas=node.formulas)
                     node.children.add(new_node)
@@ -107,7 +107,8 @@ class Tableau:
             pre_state.remove()
         self.pre_states = {}
 
-    def remove_state(self, node):
+    @staticmethod
+    def remove_state(node):
         successors = node.find_all_successors()
         candidates = set(successors)
         bad = set(successors)
@@ -120,13 +121,10 @@ class Tableau:
                 for parent in successor.parents:
                     if parent not in bad:
                         changed = True
-                        try:
-                            candidates.remove(successor)
-                            bad.remove(successor)
-                            break
-                        except:
-                            import pdb
-                            pdb.set_trace()
+                        candidates.remove(successor)
+                        bad.remove(successor)
+                        break
+
             successors = set(candidates)
 
         candidates.add(node)
@@ -134,8 +132,8 @@ class Tableau:
             node_to_remove.simple_remove()
         return candidates
 
-    #TODO: static and without patameter node
-    def find_child_to_handle(self, node, children):
+    @staticmethod
+    def find_child_to_handle(children):
         for child in children:
             if child.node_type == NodeType.PRE_STATE and not child.done_branch:
                 return child
@@ -182,12 +180,42 @@ class Tableau:
         assert False, "Not good?"
 
     def get_next_branch(self):
-        branch = self._build_next_branch()
-        self._mark_branch_as_done(branch)
+        branch, leaf = self._build_next_branch()
+        self._mark_branch_as_done(leaf)
         return branch
 
-    def _mark_branch_as_done(self, branch):
-        pass
+    def _get_original_node(self, node):
+        if node.node_type == NodeType.PRE_STATE:
+            return self.pre_states[node.id]
+        elif node.node_type == NodeType.STATE:
+            return self.states[node.id]
+        assert False
+
+    def _mark_branch_as_done(self, leaf: Node):
+        curr_leaf = leaf
+        original_node = self._get_original_node(curr_leaf)
+        original_node.done_branch = True
+        curr_leaf.done_branch = True
+        (curr_leaf,) = curr_leaf.parents
+
+        while len(curr_leaf.parents) > 0:
+            if curr_leaf == leaf:
+                return
+
+            original_node = self._get_original_node(curr_leaf)
+
+            for child in original_node.children:
+                if not child.done_branch:
+                    return
+            original_node.done_branch = True
+            curr_leaf.done_branch = True
+
+            if len(curr_leaf.parents) == 1:
+                (curr_leaf, ) = curr_leaf.parents
+
+            else:
+                (parent1, parent2) = curr_leaf.parents
+                curr_leaf = parent2 if parent1.done_branch else parent1
 
     def _build_next_branch(self):
         assert self.type == TableauType.DFS
@@ -200,7 +228,7 @@ class Tableau:
 
         while True:
             if len(original_curr_root.children) == 0:
-                return new_tableau, original_curr_root
+                return new_tableau, new_curr_root
 
             elif len(original_curr_root.children) == 1:
                 child = original_curr_root.children.pop()
@@ -210,7 +238,7 @@ class Tableau:
                 if child_in_new_tableau:
                     child_in_new_tableau.parents.add(new_curr_root)
                     new_curr_root.children.add(child_in_new_tableau)
-                    return new_tableau, original_curr_root
+                    return new_tableau, new_curr_root
 
                 new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(), node_type=child.node_type,
                                 initial=child.initial, formulas=child.formulas, node_id=child.id)
@@ -220,7 +248,7 @@ class Tableau:
                 continue
 
             else:  # len(original_curr_root.children) > 1
-                child = self.find_child_to_handle(original_curr_root, original_curr_root.children)
+                child = self.find_child_to_handle(original_curr_root.children)
                 new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(),
                                 node_type=child.node_type, initial=child.initial,
                                 formulas=child.formulas, node_id=child.id)
