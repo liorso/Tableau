@@ -43,24 +43,30 @@ class Node:
     def __hash__(self):
         return hash(id(self))
 
-    def handle_alpha(self, formulas):
+    def handle_alpha(self, formulas, node_has_children):
         new_formulas = set(self.formulas)
         new_formulas.update(formulas)
 
-        node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+        if self.tableau.type == TableauType.DFS and node_has_children:
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
                      initial=self.initial, formulas=new_formulas)
-
+        else:
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+                     initial=self.initial, formulas=new_formulas)
         self.children.add(node1)
 
-    def handle_beta(self, formulas):
+    def handle_beta(self, formulas, node_has_children):
         new_formulas = set(self.formulas)
         new_formulas.update({formulas.pop()})
         if self.tableau.type == TableauType.BFS:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                          initial=self.initial, formulas=new_formulas)
         else:
-            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+            node_type = NodeType.FUTURE if node_has_children else NodeType.PRE_STATE
+        
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=node_type,
                          initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
+
         self.children.add(node1)
 
         # we might have gotten only 1 formula, this can happen if both parts were identical
