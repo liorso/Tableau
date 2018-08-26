@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="84cfb647-a4a6-45b1-a20c-df39b50b92e8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/translte_from_pltl_to_our.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tableau.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tableau.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node.py" beforeDir="false" afterPath="$PROJECT_DIR$/node.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,12 +40,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="13422" />
+          <entry key="py" value="13758" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="13422" />
+          <entry key="Python" value="13758" />
         </counts>
       </usages-collector>
     </session>
@@ -90,12 +87,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Tableau.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="121" column="35" lean-forward="true" selection-start-line="121" selection-start-column="35" selection-end-line="121" selection-end-column="35" />
+            <state relative-caret-position="262">
+              <caret line="229" column="24" selection-start-line="229" selection-start-column="24" selection-end-line="229" selection-end-column="24" />
               <folding>
                 <element signature="e#0#52#0" expanded="true" />
-                <marker date="1535300671029" expanded="true" signature="5546:5555" ph="..." />
-                <marker date="1535300671029" expanded="true" signature="7478:7484" ph="..." />
+                <marker date="1535302068352" expanded="true" signature="5546:5555" ph="..." />
+                <marker date="1535302068352" expanded="true" signature="7348:7551" ph="..." />
+                <marker date="1535302068352" expanded="true" signature="7532:7551" ph="..." />
               </folding>
             </state>
           </provider>
@@ -113,8 +111,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/node.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="115">
-              <caret line="115" column="27" selection-start-line="115" selection-start-column="8" selection-end-line="115" selection-end-column="27" />
+            <state relative-caret-position="98">
+              <caret line="65" column="8" lean-forward="true" selection-start-line="65" selection-start-column="8" selection-end-line="65" selection-end-column="8" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -142,7 +140,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>find</find>
       <find>asser</find>
       <find>remove_eventualities</find>
       <find>is_true</find>
@@ -159,7 +156,6 @@
       <find>todo</find>
       <find>Node</find>
       <find>Node(</find>
-      <find>TODO</find>
       <find>nodetype</find>
       <find>root_nodes</find>
       <find>cloned</find>
@@ -169,9 +165,11 @@
       <find>Tableau</find>
       <find>exit</find>
       <find>pdb</find>
-      <find>find_all_successors</find>
       <find>O</find>
+      <find>find_all_successors</find>
       <find>remove_state</find>
+      <find>TODO</find>
+      <find>find_child_to_handle</find>
     </findStrings>
     <replaceStrings>
       <replace>~</replace>
@@ -196,11 +194,11 @@
         <option value="$PROJECT_DIR$/formula.py" />
         <option value="$PROJECT_DIR$/bfs_tableau.py" />
         <option value="$PROJECT_DIR$/dfs_tableau.py" />
-        <option value="$PROJECT_DIR$/node.py" />
         <option value="$PROJECT_DIR$/venv/creator.py" />
         <option value="$PROJECT_DIR$/common.py" />
         <option value="$PROJECT_DIR$/venv/Scripts/translte_from_pltl_to_our.py" />
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/node.py" />
         <option value="$PROJECT_DIR$/Tableau.py" />
       </list>
     </option>
@@ -503,23 +501,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bfs_tableau.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-646">
-          <caret line="1" column="9" selection-start-line="1" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="115" column="27" selection-start-line="115" selection-start-column="8" selection-end-line="115" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/formula.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="381">
@@ -539,14 +520,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/bfs_tableau.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-646">
+          <caret line="1" column="9" selection-start-line="1" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="98">
+          <caret line="65" column="8" lean-forward="true" selection-start-line="65" selection-start-column="8" selection-end-line="65" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Tableau.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="121" column="35" lean-forward="true" selection-start-line="121" selection-start-column="35" selection-end-line="121" selection-end-column="35" />
+        <state relative-caret-position="262">
+          <caret line="229" column="24" selection-start-line="229" selection-start-column="24" selection-end-line="229" selection-end-column="24" />
           <folding>
             <element signature="e#0#52#0" expanded="true" />
-            <marker date="1535300671029" expanded="true" signature="5546:5555" ph="..." />
-            <marker date="1535300671029" expanded="true" signature="7478:7484" ph="..." />
+            <marker date="1535302068352" expanded="true" signature="5546:5555" ph="..." />
+            <marker date="1535302068352" expanded="true" signature="7348:7551" ph="..." />
+            <marker date="1535302068352" expanded="true" signature="7532:7551" ph="..." />
           </folding>
         </state>
       </provider>

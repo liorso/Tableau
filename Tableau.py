@@ -139,12 +139,7 @@ class Tableau:
         for child in children:
             if child.node_type == NodeType.PRE_STATE and not child.done_branch:
                 return child
-        node.done_branch = True
-
-        print(self)
-        print('node id with problem:', node.id)
-        print(children)
-        assert False, 'child does not found'
+        assert False, 'child not found'
 
     def remove_inconsistent(self):
         self.remove_non_successors()
@@ -187,6 +182,14 @@ class Tableau:
         assert False, "Not good?"
 
     def get_next_branch(self):
+        branch = self._build_next_branch()
+        self._mark_branch_as_done(branch)
+        return branch
+
+    def _mark_branch_as_done(self, branch):
+        pass
+
+    def _build_next_branch(self):
         assert self.type == TableauType.DFS
         new_tableau = Tableau(tableau_type=TableauType.DFS)
 
@@ -197,17 +200,17 @@ class Tableau:
 
         while True:
             if len(original_curr_root.children) == 0:
-                return new_tableau
+                return new_tableau, original_curr_root
 
             elif len(original_curr_root.children) == 1:
-                child = original_curr_root.children.pop()  # TODO: pop deletes the element, do we want it??
+                child = original_curr_root.children.pop()
                 original_curr_root.children.add(child)
 
                 child_in_new_tableau = new_tableau.is_child_in_tableau(child)
                 if child_in_new_tableau:
                     child_in_new_tableau.parents.add(new_curr_root)
                     new_curr_root.children.add(child_in_new_tableau)
-                    return new_tableau
+                    return new_tableau, original_curr_root
 
                 new_node = Node(tableau=new_tableau, parents=new_curr_root, children=set(), node_type=child.node_type,
                                 initial=child.initial, formulas=child.formulas, node_id=child.id)
@@ -225,7 +228,6 @@ class Tableau:
                 new_curr_root = new_node
                 original_curr_root = child
                 continue
-
 
     def is_open(self):
         for state in self.states.values():

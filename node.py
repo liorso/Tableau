@@ -61,12 +61,12 @@ class Node:
         if self.tableau.type == TableauType.BFS:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                          initial=self.initial, formulas=new_formulas)
-        elif node_has_children:
-            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
-                         initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
         else:
-            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
+            node_type = NodeType.FUTURE if node_has_children else NodeType.PRE_STATE
+        
+            node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=node_type,
                          initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
+
         self.children.add(node1)
 
         # we might have gotten only 1 formula, this can happen if both parts were identical
