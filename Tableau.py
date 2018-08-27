@@ -41,26 +41,29 @@ class Tableau:
     def apply_alpha_beta(self):
         for node in self.proto_states.values():
             node_has_children = False
-            for formula in node.formulas:
+
+            formulas = list(node.formulas)
+            formulas.sort()
+            
+            for formula in formulas:
                 if formula.is_true():
                     new_node = Node(tableau=self, parents=node, children=set(), node_type=NodeType.STATE,
                                     initial=node.initial, formulas=node.formulas)
                     node.children.add(new_node)
 
                 elif not formula.marked and not formula.is_elementary():
-                    formula.mark()
 
                     is_alpha, formulas = formula.is_alpha()
                     formulas = {Formula(formulas[0]), Formula(formulas[1])}
                     if is_alpha:
-                        node.handle_alpha(formulas, node_has_children)
+                        node.handle_alpha(formulas, node_has_children, formula)
                         node_has_children = True
 
                     else:
                         is_beta, formulas = formula.is_beta()
                         formulas = {Formula(formulas[0]), Formula(formulas[1])}
                         assert is_beta, 'formula must be alpha/beta/elementary'
-                        node.handle_beta(formulas, node_has_children)
+                        node.handle_beta(formulas, node_has_children, formula)
                         node_has_children = True
 
             if len(node.children) == 0:

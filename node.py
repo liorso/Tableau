@@ -1,13 +1,12 @@
 import copy
-from common import NodeType, Connective, BetaOrder, TableauType
+from common import NodeType, Connective, TableauType
 from formula import Formula
 
 
 class Node:
     id = 0
 
-    def __init__(self, tableau, parents, children, node_type, initial, formulas, beta_order=BetaOrder.NONE,
-                 node_id=None):
+    def __init__(self, tableau, parents, children, node_type, initial, formulas, node_id=None):
         if node_id:
             self.id = node_id
         else:
@@ -22,19 +21,17 @@ class Node:
         self.formulas = set(copy.deepcopy(formulas))
         self.cloned = False
         self.find_successor_visited = False
-        self.beta_order = beta_order
         self.done_branch = False
 
-        if beta_order != BetaOrder.NONE or node_type == NodeType.FUTURE:
+        if node_type == NodeType.FUTURE:
             assert self.tableau.type == TableauType.DFS
 
         tableau.insert(self)
 
     def __repr__(self):
-        return f'id: {self.id}, parents: {[node.id for node in self.parents]}, ' \
+        return f'\nid: {self.id}, parents: {[node.id for node in self.parents]}, ' \
                f'children: {[node.id for node in self.children]}, node_type: {self.node_type} ' \
                f'initial: {self.initial}, formulas: {self.formulas}, cloned: {self.cloned}, ' \
-               f'find_successor_visited: {self.find_successor_visited}, beta_order: {self.beta_order}, ' \
                f'done_branch: {self.done_branch}'
 
     def __eq__(self, other):
@@ -43,8 +40,13 @@ class Node:
     def __hash__(self):
         return hash(id(self))
 
-    def handle_alpha(self, formulas, node_has_children):
-        new_formulas = set(self.formulas)
+    def handle_alpha(self, formulas, node_has_children, formula_processed):
+        new_formulas = copy.deepcopy(self.formulas)
+
+        for formula in new_formulas:
+            if formula == formula_processed:
+                formula.mark()
+
         new_formulas.update(formulas)
 
         if self.tableau.type == TableauType.DFS and node_has_children:
@@ -55,31 +57,50 @@ class Node:
                          initial=self.initial, formulas=new_formulas)
         self.children.add(node1)
 
-    def handle_beta(self, formulas, node_has_children):
-        new_formulas = set(self.formulas)
-        new_formulas.update({formulas.pop()})
+    def handle_beta(self, formulas, node_has_children, formula_processed):
+        new_formulas = copy.deepcopy(self.formulas)
+
+        # We want to first handle the shorter formula
+        formulas = list(formulas)
+        if len(formulas) > 1:
+            formulas.sort()
+            formula1, formula2 = formulas
+        else:
+            formula1, formula2 = formulas[0], None
+
+        for formula in new_formulas:
+            if formula == formula_processed:
+                formula.mark()
+
+        new_formulas.update({formula1})
+
         if self.tableau.type == TableauType.BFS:
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                          initial=self.initial, formulas=new_formulas)
         else:
             node_type = NodeType.FUTURE if node_has_children else NodeType.PRE_STATE
-        
+
             node1 = Node(tableau=self.tableau, parents=self, children=set(), node_type=node_type,
-                         initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.FIRST)
+                         initial=self.initial, formulas=new_formulas)
 
         self.children.add(node1)
 
         # we might have gotten only 1 formula, this can happen if both parts were identical
-        if len(formulas) > 0:
-            new_formulas = set(self.formulas)
-            new_formulas.update(formulas)
+        if formula2:
+            new_formulas = copy.deepcopy(self.formulas)
+
+            for formula in new_formulas:
+                if formula == formula_processed:
+                    formula.mark()
+
+            new_formulas.add(formula2)
 
             if self.tableau.type == TableauType.BFS:
                 node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.PRE_STATE,
                              initial=self.initial, formulas=new_formulas)
             else:
                 node2 = Node(tableau=self.tableau, parents=self, children=set(), node_type=NodeType.FUTURE,
-                             initial=self.initial, formulas=new_formulas, beta_order=BetaOrder.SECOND)
+                             initial=self.initial, formulas=new_formulas)
 
             self.children.add(node2)
 

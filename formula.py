@@ -15,6 +15,18 @@ class Formula:
     def __eq__(self, other):
         return self.formula_string == other.formula_string
 
+    def __le__(self, other):
+        return len(self.formula_string) <= len(other.formula_string)
+
+    def __ge__(self, other):
+        return len(self.formula_string) >= len(other.formula_string)
+
+    def __lt__(self, other):
+        return len(self.formula_string) < len(other.formula_string)
+
+    def __gt__(self, other):
+        return len(self.formula_string) > len(other.formula_string)
+
     @staticmethod
     def _build_formula(formula):
         return f'{Connective.OPEN.value}{formula}{Connective.CLOSE.value}'

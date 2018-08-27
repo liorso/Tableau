@@ -4,9 +4,10 @@ from Tableau import Tableau
 
 
 class DfsTableau:
-    def __init__(self, formula, debug=False):
+    def __init__(self, formula, expected_result=None, debug=False):
         self.tableau = Tableau(tableau_type=TableauType.DFS)
         self.formula = formula
+        self.expected_result = expected_result
         self.debug = debug
 
     def construct_next_branch(self):
@@ -60,6 +61,8 @@ class DfsTableau:
         Node(tableau=self.tableau, parents=set(), children=set(), node_type=NodeType.FUTURE, initial=True,
              formulas=[self.formula])
 
+        res = False
+
         build_next_branch = True
         while build_next_branch:
             self.construct_next_branch()
@@ -72,10 +75,14 @@ class DfsTableau:
 
             if self.check_is_next_branch_valid():
                 Node.id = 0
-                return True
+                res = True
+                break
 
             if self.debug:
                 print('last branch was not valid, check next branch, tableau is:\n')
                 print(self.tableau)
         Node.id = 0
-        return False
+
+        if self.expected_result:
+            assert res == self.expected_result, f'got: {res}, expected: {self.expected_result}, formula: {self.formula}'
+        return res

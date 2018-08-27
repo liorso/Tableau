@@ -4,9 +4,10 @@ from Tableau import Tableau
 
 
 class BfsTableau:
-    def __init__(self, formula, debug=False):
+    def __init__(self, formula, expected_result=None, debug=False):
         self.tableau = Tableau(tableau_type=TableauType.BFS)
         self.formula = formula
+        self.expected_result = expected_result
         self.debug = debug
 
     def construct_pre_tableau(self):
@@ -73,4 +74,7 @@ class BfsTableau:
             print(self.tableau)
 
         Node.id = 0
-        return self.tableau.is_open()
+        res = self.tableau.is_open()
+        if self.expected_result:
+            assert res == self.expected_result, f'got: {res}, expected: {self.expected_result}, formula: {self.formula}'
+        return res
