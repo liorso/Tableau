@@ -102,7 +102,7 @@ def main():
                     DfsTableau(Formula(formula_string), expected_result=expected_result,
                                debug=args.dfs_debug).build_tableau()
 
-    print(f'\nall formulas match, checked {args.iterations} times')
+    print('\nall formulas match, checked {} times'.format(args.iterations))
 
 
 if __name__ == "__main__":

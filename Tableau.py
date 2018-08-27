@@ -13,8 +13,8 @@ class Tableau:
         self.type = tableau_type
 
     def __repr__(self):
-        return f'pre_states: {self.pre_states}\nproto_states: {self.proto_states}\n' \
-               f'future_states: {self.future_states}\nstates: {self.states}'
+        return 'pre_states: {}\nproto_states: {}\n future_states: {}\nstates: {}' \
+               ''.format(self.pre_states, self.proto_states, self.future_states, self.states)
 
     def insert(self, node):
         if node.node_type == NodeType.PRE_STATE:

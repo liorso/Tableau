@@ -1,5 +1,6 @@
 from common import Connective
 
+
 def translate():
     formula = ''
     with open(r'C:\Users\Lior\university\אימות אוטומטי\project\benchmarks\schuppan\phltl\phltl_2_1.negated.pltl') as f:
@@ -21,4 +22,6 @@ def translate():
             else:
                 break
         print(formula)
+
+
 translate()

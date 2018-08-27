@@ -29,10 +29,10 @@ class Node:
         tableau.insert(self)
 
     def __repr__(self):
-        return f'\nid: {self.id}, parents: {[node.id for node in self.parents]}, ' \
-               f'children: {[node.id for node in self.children]}, node_type: {self.node_type} ' \
-               f'initial: {self.initial}, formulas: {self.formulas}, cloned: {self.cloned}, ' \
-               f'done_branch: {self.done_branch}'
+        return '\nid: {}, parents: {}, children: {}, node_type: {} initial: {}, formulas: {}, cloned: {}, ' \
+               'done_branch: {}'.format(self.id, [node.id for node in self.parents],
+                                        [node.id for node in self.children], self.node_type,
+                                        self.initial, self.formulas, self.cloned, self.done_branch)
 
     def __eq__(self, other):
         return self.id == other.id

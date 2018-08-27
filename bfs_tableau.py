@@ -76,5 +76,6 @@ class BfsTableau:
         Node.id = 0
         res = self.tableau.is_open()
         if self.expected_result:
-            assert res == self.expected_result, f'got: {res}, expected: {self.expected_result}, formula: {self.formula}'
+            assert res == self.expected_result, 'got: {}, expected: {}, formula: {}'.format(res, self.expected_result,
+                                                                                            self.formula)
         return res

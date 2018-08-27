@@ -7,7 +7,7 @@ class Formula:
         self.marked = False
 
     def __repr__(self):
-        return f'string: {self.formula_string}, marked: {self.marked}'
+        return 'string: {}, marked: {}'.format(self.formula_string, self.marked)
 
     def __hash__(self):
         return hash(self.formula_string)
@@ -29,7 +29,7 @@ class Formula:
 
     @staticmethod
     def _build_formula(formula):
-        return f'{Connective.OPEN.value}{formula}{Connective.CLOSE.value}'
+        return '{}{}{}'.format(Connective.OPEN.value, formula, Connective.CLOSE.value)
 
     def find_next_symbol(self, sub_formula_string):
         symbol = sub_formula_string[0]
@@ -68,8 +68,8 @@ class Formula:
             return True, (self.formula_string[1:index - 1], self.formula_string[index + 2:-1])
 
         if symbol == Connective.GLOBALLY.value:
-            return True, (self.formula_string[2:-1], f'{Connective.NEXT.value}'
-                                                     f'{self._build_formula(self.formula_string)}')
+            return True, (self.formula_string[2:-1], Connective.NEXT.value +
+                          self._build_formula(self.formula_string))
 
         if symbol == Connective.NOT.value:
             second_symbol, second_index = self.find_next_symbol(self.formula_string[2:-1])
@@ -80,24 +80,23 @@ class Formula:
                 return True, (sub_formula, sub_formula)
 
             if second_symbol == Connective.OR.value:
-                return True, (f'{Connective.NOT.value}{self._build_formula(self.formula_string[3:second_index-1])}',
-                              f'{Connective.NOT.value}{self._build_formula(self.formula_string[second_index+2:-2])}')
+                return True, (Connective.NOT.value + self._build_formula(self.formula_string[3:second_index-1]),
+                              Connective.NOT.value + self._build_formula(self.formula_string[second_index+2:-2]))
 
             if second_symbol == Connective.IMPLIES.value:
-                return True, (f'{self.formula_string[3:second_index-1]}',
-                              f'{Connective.NOT.value}{self._build_formula(self.formula_string[second_index+2:-2])}')
+                return True, (self.formula_string[3:second_index-1],
+                              Connective.NOT.value + self._build_formula(self.formula_string[second_index+2:-2]))
 
             if second_symbol == Connective.NEXT.value:
-                sub_formula = f'{Connective.NOT.value}{self._build_formula(self.formula_string[4:-2])}'
-                sub_formula = f'{Connective.NEXT.value}{self._build_formula(sub_formula)}'
+                sub_formula = Connective.NOT.value + self._build_formula(self.formula_string[4:-2])
+                sub_formula = Connective.NEXT.value + self._build_formula(sub_formula)
                 return True, (sub_formula, sub_formula)
 
             if second_symbol == Connective.FINALLY.value:
-                sub_formula = f'{Connective.NEXT.value}{self._build_formula(self.formula_string[2:-1])}'
-                sub_formula = f'{Connective.NOT.value}{self._build_formula(sub_formula)}'
+                sub_formula = Connective.NEXT.value + self._build_formula(self.formula_string[2:-1])
+                sub_formula = Connective.NOT.value + self._build_formula(sub_formula)
 
-                return True, (f'{Connective.NOT.value}'
-                              f'{self._build_formula(self.formula_string[4:-2])}', sub_formula)
+                return True, (Connective.NOT.value + self._build_formula(self.formula_string[4:-2]), sub_formula)
 
         return False, (None, None)
 
@@ -108,42 +107,42 @@ class Formula:
             return True, (self.formula_string[1:index - 1], self.formula_string[index + 2:-1])
 
         if symbol == Connective.IMPLIES.value:
-            return True, (f'{Connective.NOT.value}{self._build_formula(self.formula_string[1:index-1])}',
+            return True, (Connective.NOT.value + self._build_formula(self.formula_string[1:index-1]),
                           self.formula_string[index + 2:-1])
 
         if symbol == Connective.UNTIL.value:
-            sub1 = f'{Connective.NEXT.value}{self._build_formula(self.formula_string)}'
-            sub1 = f'{self._build_formula(sub1)}'
-            sub2 = f'{self._build_formula(self.formula_string[1:index - 1])}'
-            return True, (self.formula_string[index + 2:-1], f'{sub2}{Connective.AND.value}{sub1}')
+            sub1 = Connective.NEXT.value + self._build_formula(self.formula_string)
+            sub1 = self._build_formula(sub1)
+            sub2 = self._build_formula(self.formula_string[1:index - 1])
+            return True, (self.formula_string[index + 2:-1], sub2 + Connective.AND.value + sub1)
 
         if symbol == Connective.FINALLY.value:
             return True, (self.formula_string[2:-1],
-                          f'{Connective.NEXT.value}{self._build_formula(self.formula_string)}')
+                          Connective.NEXT.value + self._build_formula(self.formula_string))
 
         if symbol == Connective.NOT.value:
             second_symbol, second_index = self.find_next_symbol(self.formula_string[2:-1])
             second_index += 2
 
             if second_symbol == Connective.AND.value:
-                return True, (f'{Connective.NOT.value}{self._build_formula(self.formula_string[3:second_index-1])}',
-                              f'{Connective.NOT.value}{self._build_formula(self.formula_string[second_index+2:-2])}')
+                return True, (Connective.NOT.value + self._build_formula(self.formula_string[3:second_index-1]),
+                              Connective.NOT.value + self._build_formula(self.formula_string[second_index+2:-2]))
 
             if second_symbol == Connective.UNTIL.value:
-                sub1 = f'{Connective.NOT.value}{self._build_formula(self.formula_string[3:second_index-1])}'
-                sub2 = f'{Connective.NOT.value}{self._build_formula(self.formula_string[second_index+2:-2])}'
-                formula1 = f'{self._build_formula(sub1)}{Connective.AND.value}{self._build_formula(sub2)}'
+                sub1 = Connective.NOT.value + self._build_formula(self.formula_string[3:second_index-1])
+                sub2 = Connective.NOT.value + self._build_formula(self.formula_string[second_index+2:-2])
+                formula1 = self._build_formula(sub1) + Connective.AND.value + self._build_formula(sub2)
 
-                sub3 = f'{Connective.NEXT.value}{self._build_formula(self.formula_string[2:-1])}'
-                sub3 = f'{Connective.NOT.value}{self._build_formula(sub3)}'
-                formula2 = f'{self._build_formula(sub2)}{Connective.AND.value}{self._build_formula(sub3)}'
+                sub3 = Connective.NEXT.value + self._build_formula(self.formula_string[2:-1])
+                sub3 = Connective.NOT.value + self._build_formula(sub3)
+                formula2 = self._build_formula(sub2) + Connective.AND.value + self._build_formula(sub3)
                 return True, (formula1, formula2)
 
             if second_symbol == Connective.GLOBALLY.value:
-                sub1 = f'{Connective.NEXT.value}{self._build_formula(self.formula_string[second_index:-1])}'
+                sub1 = Connective.NEXT.value + self._build_formula(self.formula_string[second_index:-1])
 
-                return True, (f'{Connective.NOT.value}{self._build_formula(self.formula_string[4:-2])}',
-                              f'{Connective.NOT.value}{self._build_formula(sub1)}')
+                return True, (Connective.NOT.value + self._build_formula(self.formula_string[4:-2]),
+                              Connective.NOT.value + self._build_formula(sub1))
 
             return False, (None, None)
 

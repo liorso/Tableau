@@ -3,6 +3,7 @@ import os
 folder_path = "/home/asaf/Desktop/pltl/schuppan/phltl/"
 output_folder = "/home/asaf/Desktop/pltl/schuppan_pad/phltl_pad/"
 
+
 def pad_folder():
 
     for filename in os.listdir(folder_path):
@@ -50,31 +51,25 @@ def pad_var(f, first_char):
                     next3 = f.read(1)
                     if next3:
                         if next3.isdigit():
-                            #print(str(first_char)+str(next1)+str(next2)+str(next3))
-                            return (str(first_char)+str(next1)+str(next2)+str(next3))
+                            return str(first_char)+str(next1)+str(next2)+str(next3)
                         else:
                             f.seek(init_pos+2)
-                            #print(str(first_char)+"0"+str(next1)+str(next2))
-                            return (str(first_char)+"0"+str(next1)+str(next2))
+                            return str(first_char)+"0"+str(next1)+str(next2)
                     else:
                         f.seek(init_pos+2)
-                        #print(str(first_char)+"0"+str(next1)+str(next2))
-                        return (str(first_char)+"0"+str(next1)+str(next2))
+                        return str(first_char)+"0"+str(next1)+str(next2)
                 else:
                     f.seek(init_pos+1)
-                    #print(str(first_char)+"00"+str(next1))
-                    return (str(first_char)+"00"+str(next1))
+                    return str(first_char)+"00"+str(next1)
             else:
                 f.seek(init_pos+1)
-                #print(str(first_char+"000"))
                 return str(first_char+"000")
         else:
             f.seek(init_pos)
-            #print(str(first_char+"000"))
             return str(first_char+"000")
     else:
         f.seek(init_pos)
-        #print(str(first_char+"000"))
         return str(first_char+"000")
+
 
 pad_folder()
