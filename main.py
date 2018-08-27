@@ -38,17 +38,17 @@ def main():
 
         if not args.bfs_only:
             if args.timeit:
-                print(timeit.timeit(DfsTableau(Formula(args.single_test_case), debug=args.dfs_debug).build_tableau,
+                print(timeit.timeit(DfsTableau(Formula(formula_string), debug=args.dfs_debug).build_tableau,
                                     number=args.timeit_amount))
             else:
-                print('dfs:', DfsTableau(Formula(args.single_test_case), debug=args.dfs_debug).build_tableau())
+                print('dfs:', DfsTableau(Formula(formula_string), debug=args.dfs_debug).build_tableau())
 
         if not args.dfs_only:
             if args.timeit:
-                print(timeit.timeit(BfsTableau(Formula(args.single_test_case), debug=args.bfs_debug).build_tableau,
+                print(timeit.timeit(BfsTableau(Formula(formula_string), debug=args.bfs_debug).build_tableau,
                                     number=args.timeit_amount))
             else:
-                print('bfs:', BfsTableau(Formula(args.single_test_case), debug=args.bfs_debug).build_tableau())
+                print('bfs:', BfsTableau(Formula(formula_string), debug=args.bfs_debug).build_tableau())
 
         return
 
