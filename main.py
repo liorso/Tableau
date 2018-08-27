@@ -10,6 +10,7 @@ sys.setrecursionlimit(200000)
 def get_args():
     args = argparse.ArgumentParser()
     args.add_argument('--single-test-case', default=None)
+    args.add_argument('--expected-result', default=None)
     args.add_argument('--bfs-only', action='store_true')
     args.add_argument('--dfs-only', action='store_true')
     args.add_argument('--bfs-debug', action='store_true')
@@ -24,6 +25,13 @@ def get_args():
 def main():
     args = get_args()
 
+    if args.expected_result in ['true', 'True', '1']:
+        args.expected_result = True
+    elif args.expected_result in ['false', 'False', '0']:
+        args.expected_result = False
+    else:
+        assert args.expected_result is None, 'invalid expected result use true/false'
+
     formula_string = None
 
     if args.file:
@@ -34,21 +42,23 @@ def main():
         formula_string = args.single_test_case
 
     if formula_string:
-        print(formula_string)
-
         if not args.bfs_only:
             if args.timeit:
-                print(timeit.timeit(DfsTableau(Formula(formula_string), debug=args.dfs_debug).build_tableau,
-                                    number=args.timeit_amount))
+                time = timeit.timeit(DfsTableau(Formula(formula_string), expected_result=args.expected_result,
+                                                debug=args.dfs_debug).build_tableau, number=args.timeit_amount)
+                print('dfs time: {}'.format(time))
             else:
-                print('dfs:', DfsTableau(Formula(formula_string), debug=args.dfs_debug).build_tableau())
+                print('dfs:', DfsTableau(Formula(formula_string), expected_result=args.expected_result,
+                                         debug=args.dfs_debug).build_tableau())
 
         if not args.dfs_only:
             if args.timeit:
-                print(timeit.timeit(BfsTableau(Formula(formula_string), debug=args.bfs_debug).build_tableau,
-                                    number=args.timeit_amount))
+                time = timeit.timeit(BfsTableau(Formula(formula_string), expected_result=args.expected_result,
+                                                debug=args.bfs_debug).build_tableau, number=args.timeit_amount)
+                print('bfs time: {}'.format(time))
             else:
-                print('bfs:', BfsTableau(Formula(formula_string), debug=args.bfs_debug).build_tableau())
+                print('bfs:', BfsTableau(Formula(formula_string), expected_result=args.expected_result,
+                                         debug=args.bfs_debug).build_tableau())
 
         return
 
