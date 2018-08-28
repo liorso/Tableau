@@ -69,7 +69,7 @@ def main():
             assert False
 
         cmd = ['python', 'main.py', '--file', file_path, '--expected-result', str(expected_result),
-               '--timeit', '--timeit-amount', str(args.timeit_amount)]
+               '--timeit']
 
         bfs_time = None
         dfs_time = None
