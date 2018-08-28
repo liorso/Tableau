@@ -1,13 +1,8 @@
 import os
 import subprocess
-import timeit
 import argparse
 
 OUT_FILE = 'out'
-ERRORS_FILE = 'errors'
-
-pltl_proccess = None
-tableau_process = None
 
 
 def get_args():
@@ -26,10 +21,9 @@ def get_args():
 def main():
     args = get_args()
 
-    if os.path.isfile(OUT_FILE):
-        os.remove(OUT_FILE)
-    if os.path.isfile(ERRORS_FILE):
-        os.remove(ERRORS_FILE)
+    out_file = '{}.{}'.format(args.out_file, OUT_FILE)
+    if os.path.isfile(out_file):
+        os.remove(out_file)
 
     files = os.listdir(args.folder)
     files.sort()
@@ -38,77 +32,90 @@ def main():
     for file_name in files:
         file_path = os.path.join(args.folder, file_name)
 
-        def time_it_pltl():
-            global pltl_proccess
-            pltl_proccess = subprocess.Popen('./pltl/pltlGraphTree/pltl < {}'.format(file_path),
-                                             universal_newlines=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                             shell=True)
-            pltl_proccess.wait()
-
-        def time_it_tableu_bfs():
-            global tableau_process
-            tableau_process = subprocess.Popen(bfs_cmd, universal_newlines=True, stdin=subprocess.PIPE,
-                                               stdout=subprocess.PIPE)
-            tableau_process.wait()
-
-        def time_it_tableu_dfs():
-            global tableau_process
-            cmd.append('--dfs-only')
-            tableau_process = subprocess.Popen(dfs_cmd, universal_newlines=True, stdin=subprocess.PIPE,
-                                               stdout=subprocess.PIPE)
-            tableau_process.wait()
+        pltl_graph_time = 0
+        pltl_tree_time = 0
+        bfs_time = 0
+        dfs_time = 0
 
         expected_result = None
-        if not args.skip_ltl:
-            print('start pltl')
-            pltl_time = timeit.timeit(time_it_pltl, number=args.timeit_amount)
-            print('end pltl')
 
-            pltl_output = pltl_proccess.stdout.readline()
-            if pltl_output == 'satisfiable\n':
-                expected_result = 'true'
-            elif pltl_output == 'unsatisfiable\n':
-                expected_result = 'false'
-            else:
-                assert False
+        if not args.skip_pltl:
+            pltl_graph_cmd = './pltl/pltlWolper/pltl graph verbose < {}'.format(file_path)
+            pltl_tree_cmd = './pltl/pltlWolper/pltl tree verbose < {}'.format(file_path)
+
+            for i in range(args.timeit_amount):
+                print('start graph pltl')
+                pltl_graph = subprocess.Popen(pltl_graph_cmd, universal_newlines=True, stderr=subprocess.PIPE,
+                                              stdout=subprocess.PIPE, shell=True)
+                print('finished graph pltl')
+                pltl_graph.wait()
+
+                output = pltl_graph.stdout.readlines()
+
+                time_str = output[7][6:]
+                time_str.replace('-', '+')
+                pltl_graph_time += float(time_str)
+
+                graph_result = output[6]
+                if graph_result == 'Result: Formula is satisfiable.\n':
+                    graph_result = 'true'
+                elif graph_result == 'Result: Formula is unsatisfiable.\n':
+                    graph_result = 'false'
+                else:
+                    assert False
+
+                print('start tree pltl')
+                pltl_tree = subprocess.Popen(pltl_tree_cmd, universal_newlines=True, stderr=subprocess.PIPE,
+                                             stdout=subprocess.PIPE, shell=True)
+                print('finished tree pltl')
+                pltl_tree.wait()
+                output = pltl_tree.stdout.readlines()
+
+                pltl_tree_time += float(output[7][6:])
+
+                tree_result = output[6]
+                if tree_result == 'Result: Formula is satisfiable.\n':
+                    tree_result = 'true'
+                elif tree_result == 'Result: Formula is unsatisfiable.\n':
+                    tree_result = 'false'
+                else:
+                    assert False
+
+                assert tree_result == graph_result
 
         if not args.skip_tableau:
-            cmd = ['python', 'main.py', '--file', file_path, '--timeit']
+            cmd = ['python', 'main.py', '--file', file_path, '--timeit', '--timeit-amount', str(args.timeit_amount)]
 
             if expected_result:
                 cmd.append(['--expected-result', expected_result])
 
-        bfs_time = None
-        dfs_time = None
+            if not args.dfs_only:
+                bfs_cmd = list(cmd)
+                bfs_cmd.append('--bfs-only')
 
-        if not args.dfs_only:
-            bfs_cmd = list(cmd)
-            bfs_cmd.append('--bfs-only')
-            print('start bfs tableau')
-            bfs_time = timeit.timeit(time_it_tableu_bfs, number=args.timeit_amount)
-            print('end bfs tableau')
+                print('start bfs tableau')
+                bfs_process = subprocess.Popen(bfs_cmd, universal_newlines=True, stderr=subprocess.PIPE,
+                                               stdout=subprocess.PIPE)
+                bfs_process.wait()
+                print('end bfs tableau')
 
-        if not args.bfs_only:
-            dfs_cmd = list(cmd)
-            dfs_cmd.append('--dfs-only')
-            print('start dfs tableau')
-            dfs_time = timeit.timeit(time_it_tableu_dfs, number=args.timeit_amount)
-            print('end dfs tableau')
+                bfs_time = bfs_process.stdout.readlines()[0]
 
-        read_line = str(tableau_process.stdout.readlines())
+            if not args.bfs_only:
+                dfs_cmd = list(cmd)
+                dfs_cmd.append('--dfs-only')
 
-        if tableau_process.returncode == 0:
-            with open('{}.{}'.format(args.out_file, OUT_FILE), 'a') as out:
-                out.write('{}\npltl time:{}\nbfs_tinme:{}\ndfs_time:{}\n\n'.format(file_path, pltl_time, bfs_time,
-                                                                                   dfs_time))
-        else:
-            with open('{}.{}'.format(args.out_file, ERRORS_FILE), 'a') as out:
-                out.write(file_path)
-                out.write('\n')
-                out.write(read_line)
-                out.write('\n')
-                out.write(str(tableau_process.stderr.readlines()))
-                out.write('\n\n\n')
+                print('start dfs tableau')
+                dfs_process = subprocess.Popen(dfs_cmd, universal_newlines=True, stderr=subprocess.PIPE,
+                                               stdout=subprocess.PIPE)
+                dfs_process.wait()
+                print('end dfs tableau')
+
+                dfs_time = dfs_process.stdout.readlines()[0]
+
+        with open(out_file, 'a') as out:
+            out.write('{}\npltl tree time:{}\npltl graph time:{} \nbfs_time:{}dfs_time:{}\n\n'
+                      ''.format(file_path, pltl_tree_time, pltl_graph_time, bfs_time, dfs_time))
 
 
 if __name__ == "__main__":
