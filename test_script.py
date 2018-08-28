@@ -18,6 +18,8 @@ def get_args():
     args.add_argument('--timeit-amount', type=int, default=1)
     args.add_argument('--out-file')
     args.add_argument('--max-files', type=int)
+    args.add_argument('--skip-tableau', action='store_true')
+    args.add_argument('--skip-pltl', action='store_true')
     return args.parse_args()
 
 
@@ -56,20 +58,25 @@ def main():
                                                stdout=subprocess.PIPE)
             tableau_process.wait()
 
-        print('start pltl')
-        pltl_time = timeit.timeit(time_it_pltl, number=args.timeit_amount)
-        print('end pltl')
+        expected_result = None
+        if not args.skip_ltl:
+            print('start pltl')
+            pltl_time = timeit.timeit(time_it_pltl, number=args.timeit_amount)
+            print('end pltl')
 
-        pltl_output = pltl_proccess.stdout.readline()
-        if pltl_output == 'satisfiable\n':
-            expected_result = True
-        elif pltl_output == 'unsatisfiable\n':
-            expected_result = False
-        else:
-            assert False
+            pltl_output = pltl_proccess.stdout.readline()
+            if pltl_output == 'satisfiable\n':
+                expected_result = 'true'
+            elif pltl_output == 'unsatisfiable\n':
+                expected_result = 'false'
+            else:
+                assert False
 
-        cmd = ['python', 'main.py', '--file', file_path, '--expected-result', str(expected_result),
-               '--timeit']
+        if not args.skip_tableau:
+            cmd = ['python', 'main.py', '--file', file_path, '--timeit']
+
+            if expected_result:
+                cmd.append(['--expected-result', expected_result])
 
         bfs_time = None
         dfs_time = None
