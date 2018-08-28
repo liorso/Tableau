@@ -15,6 +15,7 @@ def get_args():
     args.add_argument('--max-files', type=int)
     args.add_argument('--skip-tableau', action='store_true')
     args.add_argument('--skip-pltl', action='store_true')
+    args.add_argument('--verbose', action='store_true')
     return args.parse_args()
 
 
@@ -44,11 +45,13 @@ def main():
             pltl_tree_cmd = './pltl/pltlWolper/pltl tree verbose < {}'.format(file_path)
 
             for i in range(args.timeit_amount):
-                print('start graph pltl')
+                if args.verbose:
+                    print('start graph pltl')
                 pltl_graph = subprocess.Popen(pltl_graph_cmd, universal_newlines=True, stderr=subprocess.PIPE,
                                               stdout=subprocess.PIPE, shell=True)
-                print('finished graph pltl')
                 pltl_graph.wait()
+                if args.verbose:
+                    print('finished graph pltl')
 
                 output = pltl_graph.stdout.readlines()
 
@@ -59,16 +62,19 @@ def main():
                 graph_result = output[6]
                 if graph_result == 'Result: Formula is satisfiable.\n':
                     graph_result = 'true'
-                elif graph_result == 'Result: Formula is unsatisfiable.\n':
+                elif graph_result == 'Result: Formula is not satisfiable.\n':
                     graph_result = 'false'
                 else:
-                    assert False
+                    assert False, graph_result
 
-                print('start tree pltl')
+                if args.verbose:
+                    print('start tree pltl')
                 pltl_tree = subprocess.Popen(pltl_tree_cmd, universal_newlines=True, stderr=subprocess.PIPE,
                                              stdout=subprocess.PIPE, shell=True)
-                print('finished tree pltl')
                 pltl_tree.wait()
+                if args.verbose:
+                    print('finished tree pltl')
+
                 output = pltl_tree.stdout.readlines()
 
                 pltl_tree_time += float(output[7][6:])
@@ -76,12 +82,12 @@ def main():
                 tree_result = output[6]
                 if tree_result == 'Result: Formula is satisfiable.\n':
                     tree_result = 'true'
-                elif tree_result == 'Result: Formula is unsatisfiable.\n':
+                elif tree_result == 'Result: Formula is not satisfiable.\n':
                     tree_result = 'false'
                 else:
-                    assert False
+                    assert False, graph_result
 
-                assert tree_result == graph_result
+                assert tree_result == graph_result, 'tree_result: {}, graph_result:{}'.format(tree_result, graph_result)
 
         if not args.skip_tableau:
             cmd = ['python', 'main.py', '--file', file_path, '--timeit', '--timeit-amount', str(args.timeit_amount)]
@@ -93,11 +99,13 @@ def main():
                 bfs_cmd = list(cmd)
                 bfs_cmd.append('--bfs-only')
 
-                print('start bfs tableau')
+                if args.verbose:
+                    print('start bfs tableau')
                 bfs_process = subprocess.Popen(bfs_cmd, universal_newlines=True, stderr=subprocess.PIPE,
                                                stdout=subprocess.PIPE)
                 bfs_process.wait()
-                print('end bfs tableau')
+                if args.verbose:
+                    print('end bfs tableau')
 
                 bfs_time = bfs_process.stdout.readlines()[0]
 
@@ -105,11 +113,14 @@ def main():
                 dfs_cmd = list(cmd)
                 dfs_cmd.append('--dfs-only')
 
-                print('start dfs tableau')
+                if args.verbose:
+                    print('start dfs tableau')
+                print(dfs_cmd)
                 dfs_process = subprocess.Popen(dfs_cmd, universal_newlines=True, stderr=subprocess.PIPE,
                                                stdout=subprocess.PIPE)
                 dfs_process.wait()
-                print('end dfs tableau')
+                if args.verbose:
+                    print('end dfs tableau')
 
                 dfs_time = dfs_process.stdout.readlines()[0]
 

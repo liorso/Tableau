@@ -45,7 +45,7 @@ def main():
         if not args.bfs_only:
             if args.timeit:
                 time = timeit.timeit(lambda: DfsTableau(Formula(formula_string), expected_result=args.expected_result,
-                                                        debug=args.dfs_debug).build_tableau, number=args.timeit_amount)
+                                                        debug=args.dfs_debug).build_tableau(), number=args.timeit_amount)
                 print(time)
             else:
                 print('dfs:', DfsTableau(Formula(formula_string), expected_result=args.expected_result,
@@ -54,7 +54,7 @@ def main():
         if not args.dfs_only:
             if args.timeit:
                 time = timeit.timeit(lambda: BfsTableau(Formula(formula_string), expected_result=args.expected_result,
-                                                        debug=args.bfs_debug).build_tableau, number=args.timeit_amount)
+                                                        debug=args.bfs_debug).build_tableau(), number=args.timeit_amount)
                 print(time)
             else:
                 print('bfs:', BfsTableau(Formula(formula_string), expected_result=args.expected_result,
