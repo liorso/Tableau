@@ -115,7 +115,6 @@ def main():
 
                 if args.verbose:
                     print('start dfs tableau')
-                print(dfs_cmd)
                 dfs_process = subprocess.Popen(dfs_cmd, universal_newlines=True, stderr=subprocess.PIPE,
                                                stdout=subprocess.PIPE)
                 dfs_process.wait()
