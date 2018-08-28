@@ -194,7 +194,7 @@ class Tableau:
             return self.states[node.id]
         assert False
 
-    def _mark_branch_as_done(self, leaf: Node):
+    def _mark_branch_as_done(self, leaf):
         curr_leaf = leaf
         original_node = self._get_original_node(curr_leaf)
         original_node.done_branch = True
